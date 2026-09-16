@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OverBlack | Streetwear</title>
+<meta name="description" content="OverBlack - ropa y zapatillas oversize con estilo urbano.">
+<style>
+:root{--bg:#080808;--card:#111;--soft:#1a1a1a;--text:#f5f5f5;--muted:#aaa;--line:#292929}
+*{box-sizing:border-box;margin:0;padding:0} body{font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+a{text-decoration:none;color:inherit}.container{width:min(1120px,92%);margin:auto}
+header{position:sticky;top:0;z-index:10;background:rgba(8,8,8,.94);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.nav{height:72px;display:flex;align-items:center;justify-content:space-between}.logo{font-size:24px;font-weight:900;letter-spacing:2px}.logo span{color:#888}
+.navlinks{display:flex;gap:24px;font-size:14px;color:#ccc}.navlinks a:hover{color:#fff}
+.cart{border:1px solid #444;border-radius:999px;padding:9px 14px;font-size:13px;cursor:pointer;background:#fff;color:#000}
+.hero{min-height:570px;display:flex;align-items:center;background:radial-gradient(circle at 80% 45%,#242424 0,#111 25%,#080808 60%);border-bottom:1px solid var(--line)}
+.hero-content{max-width:700px}.tag{display:inline-block;border:1px solid #444;padding:7px 12px;border-radius:20px;color:#bbb;font-size:12px;letter-spacing:2px;text-transform:uppercase;margin-bottom:20px}
+h1{font-size:clamp(54px,9vw,105px);line-height:.9;letter-spacing:-5px;margin-bottom:25px}h1 span{color:#777}
+.hero p{color:#aaa;max-width:560px;font-size:17px;margin-bottom:30px}.btn{display:inline-block;background:#fff;color:#000;padding:14px 22px;border-radius:7px;font-weight:800;margin-right:8px}.btn.dark{background:transparent;color:#fff;border:1px solid #555}
+section{padding:70px 0}.section-head{display:flex;align-items:end;justify-content:space-between;margin-bottom:28px}.section-head h2{font-size:34px}.section-head p{color:#888;font-size:14px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:25px}.filter{background:#111;border:1px solid #333;color:#ddd;padding:9px 15px;border-radius:999px;cursor:pointer}.filter.active,.filter:hover{background:#fff;color:#000}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.product{background:var(--card);border:1px solid #202020;border-radius:10px;overflow:hidden}.photo{height:270px;background:linear-gradient(135deg,#242424,#0d0d0d);display:flex;align-items:center;justify-content:center;color:#555;font-size:12px;text-transform:uppercase;letter-spacing:2px}.info{padding:16px}.cat{color:#777;font-size:11px;text-transform:uppercase;letter-spacing:1px}.product h3{font-size:16px;margin:6px 0}.price{font-weight:800;margin-bottom:13px}.buy{display:block;text-align:center;border:1px solid #444;padding:10px;border-radius:6px;font-size:13px;font-weight:700}.buy:hover{background:#fff;color:#000}
+.banner{background:#111;border:1px solid #272727;border-radius:14px;padding:42px;text-align:center}.banner h2{font-size:35px;margin-bottom:8px}.banner p{color:#999;margin-bottom:22px}
+footer{border-top:1px solid var(--line);padding:35px 0;color:#888;font-size:13px}.footer-inner{display:flex;justify-content:space-between;gap:20px}.social{color:#fff}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:20;padding:20px}.modal.show{display:flex}.modalbox{background:#111;border:1px solid #333;border-radius:12px;width:min(500px,100%);padding:25px}.close{float:right;cursor:pointer;font-size:24px}.cart-items{margin:25px 0;max-height:300px;overflow:auto}.item{display:flex;justify-content:space-between;border-bottom:1px solid #292929;padding:12px 0}.empty{color:#888;text-align:center;padding:25px}.total{font-size:20px;font-weight:800;margin:15px 0}.whatsapp{display:block;text-align:center;background:#fff;color:#000;padding:13px;border-radius:7px;font-weight:800}
+@media(max-width:850px){.grid{grid-template-columns:repeat(2,1fr)}.navlinks{display:none}.hero{min-height:500px}.photo{height:230px}}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.footer-inner{flex-direction:column}.hero h1{letter-spacing:-3px}.banner{padding:28px 18px}}
+</style>
+</head>
+<body>
+<header>
+<div class="container nav">
+<a class="logo" href="#">OVER<span>BLACK</span></a>
+<nav class="navlinks"><a href="#inicio">Inicio</a><a href="#productos">Productos</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></nav>
+<button class="cart" onclick="openCart()">🛒 Carrito (<span id="count">0</span>)</button>
+</div>
+</header>
+
+<main>
+<section class="hero" id="inicio">
+<div class="container hero-content">
+<div class="tag">Streetwear • Perú</div>
+<h1>VISTE<br><span>DIFERENTE.</span></h1>
+<p>Ropa oversize y zapatillas con esencia urbana. Encuentra tu estilo y arma tu outfit con OverBlack.</p>
+<a class="btn" href="#productos">Ver colección</a>
+<a class="btn dark" href="https://wa.me/51981947363" target="_blank">WhatsApp</a>
+</div>
+</section>
+
+<section id="productos">
+<div class="container">
+<div class="section-head"><div><h2>Productos</h2><p>Agrega tus productos reales cuando quieras.</p></div></div>
+<div class="filters">
+<button class="filter active" onclick="filterProducts('todos',this)">Todos</button>
+<button class="filter" onclick="filterProducts('polos',this)">Polos</button>
+<button class="filter" onclick="filterProducts('pantalones',this)">Pantalones</button>
+<button class="filter" onclick="filterProducts('zapatillas',this)">Zapatillas</button>
+</div>
+<div class="grid" id="grid"></div>
+</div>
+</section>
+
+<section id="nosotros">
+<div class="container">
+<div class="banner">
+<h2>OVERBLACK</h2>
+<p>Moda urbana, comodidad y actitud. Una tienda pensada para quienes quieren salir de lo común.</p>
+<a class="btn" href="https://wa.me/51981947363" target="_blank">Hablar por WhatsApp</a>
+</div>
+</div>
+</section>
+</main>
+
+<footer id="contacto">
+<div class="container footer-inner">
+<div>© 2026 OverBlack. Todos los derechos reservados.</div>
+<div class="social">WhatsApp: 981 947 363</div>
+</div>
+</footer>
+
+<div class="modal" id="modal">
+<div class="modalbox">
+<span class="close" onclick="closeCart()">×</span>
+<h2>Tu carrito</h2>
+<div class="cart-items" id="cartItems"></div>
+<div class="total">Total: S/ <span id="total">0.00</span></div>
+<a class="whatsapp" id="order" href="#" target="_blank">Pedir por WhatsApp</a>
+</div>
+</div>
+
+<script>
+const products=[
+{id:1,name:"Polo Oversize Shadow",cat:"polos",price:59},
+{id:2,name:"Polo Oversize Basic",cat:"polos",price:55},
+{id:3,name:"Cargo Urban Black",cat:"pantalones",price:89},
+{id:4,name:"Jogger Street",cat:"pantalones",price:79},
+{id:5,name:"Sneakers Urban X",cat:"zapatillas",price:149},
+{id:6,name:"Sneakers Black Low",cat:"zapatillas",price:139},
+{id:7,name:"Polo Oversize Graphic",cat:"polos",price:65},
+{id:8,name:"Cargo Wide Fit",cat:"pantalones",price:95}
+];
+let cart=[];
+
+function render(list=products){
+const grid=document.getElementById("grid");
+grid.innerHTML=list.map(p=>`<article class="product"><div class="photo">Foto del producto</div><div class="info"><div class="cat">${p.cat}</div><h3>${p.name}</h3><div class="price">S/ ${p.price.toFixed(2)}</div><button class="buy" onclick="add(${p.id})">Agregar al carrito</button></div></article>`).join("");
+}
+function filterProducts(cat,el){
+document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));el.classList.add("active");
+render(cat==="todos"?products:products.filter(p=>p.cat===cat));
+}
+function add(id){cart.push(products.find(p=>p.id===id));updateCart();}
+function updateCart(){
+document.getElementById("count").textContent=cart.length;
+const box=document.getElementById("cartItems");
+if(!cart.length){box.innerHTML='<div class="empty">Tu carrito está vacío.</div>';document.getElementById("total").textContent="0.00";return}
+box.innerHTML=cart.map((p,i)=>`<div class="item"><span>${p.name}</span><span>S/ ${p.price.toFixed(2)} <button onclick="removeItem(${i})">✕</button></span></div>`).join("");
+const total=cart.reduce((a,p)=>a+p.price,0);document.getElementById("total").textContent=total.toFixed(2);
+const text="Hola, OverBlack. Quiero pedir:%0A"+cart.map(p=>"- "+p.name+" (S/ "+p.price.toFixed(2)+")").join("%0A")+"%0A*Total: S/ "+total.toFixed(2)+"*";
+document.getElementById("order").href="https://wa.me/51981947363?text="+text;
+}
+function removeItem(i){cart.splice(i,1);updateCart();}
+function openCart(){document.getElementById("modal").classList.add("show");updateCart()}
+function closeCart(){document.getElementById("modal").classList.remove("show")}
+render();
+</script>
+</body>
+</html>
