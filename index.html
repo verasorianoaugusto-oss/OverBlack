@@ -44,6 +44,24 @@ section{padding:76px 0}.section-head h2{font-size:36px;letter-spacing:-1px}.sect
 
 .collections{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:30px}.collection{background:transparent;color:#aaa;border:0;border-bottom:3px solid transparent;padding:15px 24px;font-size:14px;font-weight:800;cursor:pointer}.collection.active{color:var(--accent);border-bottom-color:var(--accent)}.collection:hover{color:#fff}.catalog-empty{grid-column:1 / -1;border:1px solid var(--line);padding:48px 20px}.catalog-empty h3{color:var(--text);font-size:22px;margin-bottom:10px}.catalog-empty .btn{margin:20px 0 0;cursor:pointer;border:0}@media(max-width:520px){.collection{flex:1;padding:14px 8px;font-size:13px}}
 .footer-inner{flex-wrap:wrap}.social-links{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.social-link{display:inline-flex;align-items:center;gap:9px;padding:10px 14px;border:1px solid #333;border-radius:3px;color:#ddd;transition:color .2s,border-color .2s}.social-link:hover{color:var(--accent);border-color:var(--accent)}.social-link svg{width:19px;height:19px;flex-shrink:0}.social-links .social{border:0;padding:10px 0;margin-right:8px}@media(max-width:520px){.social-links{width:100%;gap:10px}.social-links .social{width:100%}}
+
+/* Looks con fotografías originales de OverBlack. */
+#looks{border-bottom:1px solid var(--line);background:#0b0b0b}
+.looks-heading:after{content:'LOOKBOOK / 01'}
+.looks-heading h2{font-size:clamp(28px,4vw,44px);letter-spacing:-1.5px}
+.looks-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}
+.look-card{min-width:0;border:1px solid #292929;background:#111}
+.look-image{display:block;position:relative;background:#171717}
+.look-image img{display:block;width:100%;height:auto;aspect-ratio:1122/1402;object-fit:contain}
+.look-number{position:absolute;top:12px;left:12px;background:#080808c9;color:#fff;font-size:9px;letter-spacing:2px;padding:6px 8px}
+.look-expand{position:absolute;right:12px;bottom:12px;display:grid;place-items:center;width:30px;height:30px;background:#080808c9;color:var(--accent);font-size:20px}
+.look-image:hover .look-expand{background:var(--accent);color:#080808}
+.look-card figcaption{padding:20px 16px}.look-card h3{font-size:19px;text-transform:uppercase;letter-spacing:-.4px}
+.look-card figcaption p{color:#aaa;font-size:12px;line-height:1.7;margin:7px 0 16px;min-height:41px}
+.look-status{display:inline-block;color:var(--accent);font-size:9px;letter-spacing:2px;border-top:1px solid #333;padding-top:12px;width:100%}
+@media(max-width:1000px){.looks-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}}
+@media(max-width:520px){.looks-grid{grid-template-columns:minmax(0,1fr);gap:26px}.looks-heading:after{display:none}.look-card figcaption{padding:20px}.look-card figcaption p{min-height:0}.look-card h3{font-size:22px}}
+
 </style>
 <meta name="theme-color" content="#080808">
 <link rel="icon" type="image/svg+xml" href="logo-overblack.svg">
@@ -52,7 +70,7 @@ section{padding:76px 0}.section-head h2{font-size:36px;letter-spacing:-1px}.sect
 <header>
 <div class="container nav">
 <a class="logo" href="#inicio" aria-label="OverBlack, inicio"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><span class="wordmark">OVER<span>BLACK</span></span></a>
-<nav class="navlinks"><a href="#inicio">Inicio</a><a href="#productos">Productos</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></nav>
+<nav class="navlinks"><a href="#inicio">Inicio</a><a href="#looks">Looks</a><a href="#productos">Productos</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></nav>
 <button class="cart" onclick="openCart()">🛒 Carrito (<span id="count">0</span>)</button>
 </div>
 </header>
@@ -63,9 +81,18 @@ section{padding:76px 0}.section-head h2{font-size:36px;letter-spacing:-1px}.sect
 <div class="tag">Streetwear • Perú</div>
 <h1>VISTE<br><span>DIFERENTE.</span></h1>
 <p>Ropa oversize y zapatillas con esencia urbana. Encuentra tu estilo y arma tu outfit con OverBlack.</p>
-<a class="btn" href="#productos">Ver colección</a>
+<a class="btn" href="#looks">Ver looks</a>
 <a class="btn dark" href="https://wa.me/51981947363" target="_blank" rel="noopener noreferrer">WhatsApp</a>
 </div><div class="brand-art" aria-hidden="true"><span class="art-index">OB — STREET CULTURE</span><div class="brand-orbit"></div><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><span class="art-cross">+</span><span class="art-label">FUERA DE LO COMÚN.</span></div></div><div class="hero-foot" aria-hidden="true"><span>ESTILO PROPIO. SIN REGLAS.</span><span>OVERBLACK — PERÚ ↘</span></div></section><div class="ticker" aria-hidden="true"><span>OVERBLACK</span><b>✳</b><span>VISTE DIFERENTE</span><b>✳</b><span>STREET CULTURE</span><b>✳</b><span>ESTILO SIN LÍMITES</span></div>
+<section id="looks" aria-labelledby="looks-title">
+<div class="container">
+<div class="section-head looks-heading"><div><span class="eyebrow">INSPIRACIÓN / STREETWEAR</span><h2 id="looks-title">OVERBLACK FITS</h2><p>Cuatro looks. Una actitud. Hazlos tuyos.</p></div></div>
+<div class="looks-grid">
+<figure class="look-card"><a class="look-image" href="look-all-black.jpg" target="_blank" rel="noopener" aria-label="Ver imagen completa: All Black"><img src="look-all-black.jpg" alt="Modelo con hoodie negro, pantalón cargo y zapatillas negras" width="1122" height="1402" loading="lazy" decoding="async"><span class="look-number" aria-hidden="true">01 / OB</span><span class="look-expand" aria-hidden="true">↗</span></a><figcaption><h3>All Black</h3><p>Hoodie negro · cargo · zapatillas negras</p><span class="look-status">PRÓXIMAMENTE</span></figcaption></figure>
+<figure class="look-card"><a class="look-image" href="look-white-street.jpg" target="_blank" rel="noopener" aria-label="Ver imagen completa: White Street"><img src="look-white-street.jpg" alt="Modelo sentada con hoodie blanco gráfico, jeans oscuros y zapatillas blancas y negras" width="1122" height="1402" loading="lazy" decoding="async"><span class="look-number" aria-hidden="true">02 / OB</span><span class="look-expand" aria-hidden="true">↗</span></a><figcaption><h3>White Street</h3><p>Hoodie gráfico · denim oscuro</p><span class="look-status">PRÓXIMAMENTE</span></figcaption></figure>
+<figure class="look-card"><a class="look-image" href="look-sport-blue.jpg" target="_blank" rel="noopener" aria-label="Ver imagen completa: Sport Blue"><img src="look-sport-blue.jpg" alt="Modelo con polo deportivo azul, pantalón negro y zapatillas de running" width="1122" height="1402" loading="lazy" decoding="async"><span class="look-number" aria-hidden="true">03 / OB</span><span class="look-expand" aria-hidden="true">↗</span></a><figcaption><h3>Sport Blue</h3><p>Azul eléctrico · actitud deportiva</p><span class="look-status">PRÓXIMAMENTE</span></figcaption></figure>
+<figure class="look-card"><a class="look-image" href="look-trail-urban.jpg" target="_blank" rel="noopener" aria-label="Ver imagen completa: Trail Urban"><img src="look-trail-urban.jpg" alt="Modelo con hoodie Nike Trail negro, pantalón negro y zapatillas blancas" width="1122" height="1402" loading="lazy" decoding="async"><span class="look-number" aria-hidden="true">04 / OB</span><span class="look-expand" aria-hidden="true">↗</span></a><figcaption><h3>Trail Urban</h3><p>Hoodie trail · contraste en blanco</p><span class="look-status">PRÓXIMAMENTE</span></figcaption></figure>
+</div></div></section>
 <section id="productos">
 <div class="container">
 <div class="section-head"><div><span class="eyebrow">ELIGE TU PRÓXIMO OUTFIT</span><h2>Productos</h2><p>Esenciales urbanos. Actitud en cada detalle.</p></div></div>
