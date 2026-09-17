@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Inicio | OverBlack</title>
+<title>Productos | OverBlack</title>
 <meta name="description" content="OverBlack - ropa y zapatillas oversize con estilo urbano.">
 <style>
 :root{--bg:#080808;--card:#111;--soft:#1a1a1a;--text:#f5f5f5;--muted:#aaa;--line:#292929}
@@ -70,20 +70,30 @@ main{min-height:calc(100vh - 220px)}.navlinks a[aria-current=page]{color:var(--a
 <header>
 <div class="container nav">
 <a class="logo" href="index.html" aria-label="OverBlack, inicio"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><span class="wordmark">OVER<span>BLACK</span></span></a>
-<nav class="navlinks" aria-label="Navegación principal"><a href="index.html" aria-current="page">Inicio</a><a href="productos.html">Productos</a><a href="outfit.html">Outfit</a><a href="nosotros.html">Nosotros</a><a href="contacto.html">Contacto</a></nav>
+<nav class="navlinks" aria-label="Navegación principal"><a href="index.html">Inicio</a><a href="productos.html" aria-current="page">Productos</a><a href="outfit.html">Outfit</a><a href="nosotros.html">Nosotros</a><a href="contacto.html">Contacto</a></nav>
 <button class="cart" onclick="openCart()">🛒 Carrito (<span id="count">0</span>)</button>
 </div>
 </header>
 
 <main id="main-content">
-<section class="hero" id="inicio">
-<div class="container hero-content"><div class="hero-copy">
-<div class="tag">Streetwear • Perú</div>
-<h1>VISTE<br><span>DIFERENTE.</span></h1>
-<p>Ropa oversize y zapatillas con esencia urbana. Encuentra tu estilo y arma tu outfit con OverBlack.</p>
-<a class="btn" href="outfit.html">Ver outfit</a>
-<a class="btn dark" href="https://wa.me/51981947363" target="_blank" rel="noopener noreferrer">WhatsApp</a>
-</div><div class="brand-art" aria-hidden="true"><span class="art-index">OB / PLAYER SELECT</span><div class="brand-orbit"></div><span class="gamer-corner" aria-hidden="true"></span><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><div class="urban-stamp">INDEPENDENT<strong>STREET<br>CULTURE</strong><small>OVERBLACK / PERÚ</small></div><span class="urban-scribble"></span><span class="art-cross">+</span><span class="art-label">FUERA DE LO COMÚN.</span></div></div><div class="hero-foot" aria-hidden="true"><span>ESTILO PROPIO. SIN REGLAS.</span><span>OVERBLACK — PERÚ ↘</span></div></section>
+<section id="productos">
+<div class="container">
+<div class="section-head"><div><span class="hud-label">ELIGE TU PRÓXIMO OUTFIT</span><h1>Productos</h1><p>Esenciales urbanos. Actitud en cada detalle.</p></div></div>
+<div class="collections" role="group" aria-label="Colecciones">
+<button class="collection active" aria-pressed="true" onclick="selectCollection('todos',this)">Todos</button>
+<button class="collection" aria-pressed="false" onclick="selectCollection('hombres',this)">Hombres</button>
+<button class="collection" aria-pressed="false" onclick="selectCollection('mujeres',this)">Mujeres</button>
+</div>
+<div class="filters" role="group" aria-label="Tipo de prenda">
+<button class="filter active" onclick="filterProducts('todos',this)">Todos</button>
+<button class="filter" onclick="filterProducts('polos',this)">Polos</button>
+<button class="filter" onclick="filterProducts('pantalones',this)">Pantalones</button>
+<button class="filter" onclick="filterProducts('zapatillas',this)">Zapatillas</button>
+<button class="filter" onclick="filterProducts('hoodies',this)">Hoodies</button>
+</div>
+<div class="grid" id="grid"></div>
+</div>
+</section>
 </main>
 
 <footer id="contacto">
