@@ -42,6 +42,7 @@ section{padding:76px 0}.section-head h2{font-size:36px;letter-spacing:-1px}.sect
 @media(max-width:520px){.nav{height:72px}.logo{gap:6px;font-size:16px}.logo svg{width:36px}.cart{padding:8px 10px;font-size:11px}.hero{padding:48px 0 55px}.hero-content{display:flex;flex-direction:column;align-items:stretch}.hero-copy{width:100%}.hero h1{font-size:clamp(46px,12.5vw,64px);letter-spacing:-3px}.hero p{max-width:340px}.tag{font-size:9px;margin-bottom:24px}.brand-art{width:68%;align-self:center;margin:28px 0 15px}.art-label{bottom:0}.art-index{font-size:7px}.hero-foot{bottom:15px;letter-spacing:1px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.photo{height:190px;font-size:7px;letter-spacing:.7px}.photo:before{font-size:6px;left:10px;letter-spacing:1px}.photo svg{width:68px}.info{padding:12px}.product h3{font-size:13px;min-height:39px}.price{font-size:15px}.buy{font-size:10px;padding:10px 4px}.section-head h2{font-size:30px}.section-head p{font-size:12px;max-width:220px}.section-head:after{font-size:8px;padding:8px;white-space:nowrap}.filters{gap:6px}.filter{font-size:11px;padding:8px 13px}section{padding:50px 0}.banner{padding:28px 22px}.footer-inner{align-items:flex-start}.footer-brand{font-size:11px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*:before,*:after{transition:none!important}}
 
+.collections{display:flex;gap:6px;border-bottom:1px solid var(--line);margin-top:30px}.collection{background:transparent;color:#aaa;border:0;border-bottom:3px solid transparent;padding:15px 24px;font-size:14px;font-weight:800;cursor:pointer}.collection.active{color:var(--accent);border-bottom-color:var(--accent)}.collection:hover{color:#fff}.catalog-empty{grid-column:1 / -1;border:1px solid var(--line);padding:48px 20px}.catalog-empty h3{color:var(--text);font-size:22px;margin-bottom:10px}.catalog-empty .btn{margin:20px 0 0;cursor:pointer;border:0}@media(max-width:520px){.collection{flex:1;padding:14px 8px;font-size:13px}}
 </style>
 <meta name="theme-color" content="#080808">
 <link rel="icon" type="image/svg+xml" href="logo-overblack.svg">
@@ -67,11 +68,17 @@ section{padding:76px 0}.section-head h2{font-size:36px;letter-spacing:-1px}.sect
 <section id="productos">
 <div class="container">
 <div class="section-head"><div><span class="eyebrow">ELIGE TU PRÓXIMO OUTFIT</span><h2>Productos</h2><p>Esenciales urbanos. Actitud en cada detalle.</p></div></div>
-<div class="filters">
+<div class="collections" role="group" aria-label="Colecciones">
+<button class="collection active" aria-pressed="true" onclick="selectCollection('todos',this)">Todos</button>
+<button class="collection" aria-pressed="false" onclick="selectCollection('hombres',this)">Hombres</button>
+<button class="collection" aria-pressed="false" onclick="selectCollection('mujeres',this)">Mujeres</button>
+</div>
+<div class="filters" role="group" aria-label="Tipo de prenda">
 <button class="filter active" onclick="filterProducts('todos',this)">Todos</button>
 <button class="filter" onclick="filterProducts('polos',this)">Polos</button>
 <button class="filter" onclick="filterProducts('pantalones',this)">Pantalones</button>
 <button class="filter" onclick="filterProducts('zapatillas',this)">Zapatillas</button>
+<button class="filter" onclick="filterProducts('hoodies',this)">Hoodies</button>
 </div>
 <div class="grid" id="grid"></div>
 </div>
@@ -117,15 +124,24 @@ const products=[
 {id:8,name:"Cargo Wide Fit",cat:"pantalones",price:95}
 ];
 let cart=[];
+let selectedCollection='todos',selectedCategory='todos';
+const catalogLabels={todos:'Todos',hombres:'Hombres',mujeres:'Mujeres',polos:'Polos',pantalones:'Pantalones',zapatillas:'Zapatillas',hoodies:'Hoodies'};
 
 function render(list=products){
 const grid=document.getElementById("grid");
+if(!list.length){const title=[selectedCollection,selectedCategory].filter(x=>x!=='todos').map(x=>catalogLabels[x]).join(' · ');grid.innerHTML=`<div class="empty catalog-empty" role="status"><span class="eyebrow">PRÓXIMAMENTE</span><h3>${title}</h3><p>Estamos preparando nuevos productos para esta selección.</p><button class="btn" onclick="resetCatalog()">Ver todos los productos</button></div>`;return;}
 grid.innerHTML=list.map(p=>`<article class="product"><div class="photo"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><span>Foto próximamente</span></div><div class="info"><div class="cat">${p.cat}</div><h3>${p.name}</h3><div class="price">S/ ${p.price.toFixed(2)}</div><button class="buy" onclick="add(${p.id})">Agregar al carrito</button></div></article>`).join("");
 }
 function filterProducts(cat,el){
-document.querySelectorAll(".filter").forEach(x=>x.classList.remove("active"));el.classList.add("active");
-render(cat==="todos"?products:products.filter(p=>p.cat===cat));
+selectedCategory=cat;syncCatalog();
 }
+function selectCollection(collection,el){selectedCollection=collection;syncCatalog();}
+function syncCatalog(){
+document.querySelectorAll('.collection').forEach((x,i)=>{const active=['todos','hombres','mujeres'][i]===selectedCollection;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active));});
+document.querySelectorAll('.filter').forEach((x,i)=>{const active=['todos','polos','pantalones','zapatillas','hoodies'][i]===selectedCategory;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active));});
+render(products.filter(p=>(selectedCategory==='todos'||p.cat===selectedCategory)&&(selectedCollection==='todos'||p.collection===selectedCollection||p.collection==='unisex')));
+}
+function resetCatalog(){selectedCollection='todos';selectedCategory='todos';syncCatalog();}
 function add(id){cart.push(products.find(p=>p.id===id));updateCart();}
 function updateCart(){
 document.getElementById("count").textContent=cart.length;
@@ -141,7 +157,7 @@ function removeItem(i){cart.splice(i,1);updateCart();}
 function openCart(){document.getElementById("modal").classList.add("show");updateCart()}
 function closeCart(){document.getElementById("modal").classList.remove("show")}
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCart()});
-render();
+syncCatalog();
 </script>
 </body>
 </html>
