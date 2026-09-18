@@ -65,12 +65,17 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 </style>
 <meta name="theme-color" content="#080808">
 <link rel="icon" type="image/svg+xml" href="logo-overblack.svg">
+
+<link rel="stylesheet" href="stack.css?v=2">
+<script defer src="stack-engine.js?v=1"></script>
+<script defer src="stack-config.js?v=1"></script>
+<script defer src="stack.js?v=2"></script>
 </head>
 <body>
 <header>
 <div class="container nav">
 <a class="logo" href="#inicio" aria-label="OverBlack, inicio"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><span class="wordmark">OVER<span>BLACK</span></span></a>
-<nav class="navlinks" aria-label="Navegación principal"><a href="#inicio">Inicio</a><a href="#outfit">Outfit</a><a href="#productos">Producto</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a></nav>
+<nav class="navlinks" aria-label="Navegación principal"><a href="#inicio">Inicio</a><a href="#outfit">Outfit</a><a href="#productos">Producto</a><a href="#nosotros">Nosotros</a><a href="#contacto">Contacto</a><a class="ob-stack-nav" href="#stack">Jugar OVERBLACK STACK</a></nav>
 <button class="cart" onclick="openCart()">🛒 Carrito (<span id="count">0</span>)</button>
 </div>
 </header>
@@ -127,6 +132,41 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 <a class="social-link" href="https://www.instagram.com/overblack160926/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de OverBlack: @overblack160926"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg><span>Instagram</span></a>
 <a class="social-link" href="https://www.tiktok.com/@overblack2026" target="_blank" rel="noopener noreferrer" aria-label="TikTok de OverBlack: @overblack2026"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M16.5 2h-3v13.5a3.5 3.5 0 1 1-3-3.46V9.01A6.5 6.5 0 1 0 16.5 15.5V8.7A9 9 0 0 0 22 10V7a5.5 5.5 0 0 1-5.5-5z"/></svg><span>TikTok</span></a>
 </nav></div></div></section>
+<section id="stack" aria-labelledby="ob-title">
+<div class="ob-world">
+ <span class="ob-wall-tag ob-wall-top" aria-hidden="true">MORE<br>THAN<br>CLOTHES</span>
+ <div class="ob-layout">
+  <aside class="ob-profile" aria-label="Tus puntos e intentos">
+   <div class="ob-card ob-account"><div class="ob-card-title">TUS PUNTOS <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 4 5 5-8 5 8 4-5-2 13H5Z"/><path d="M5 22h14"/></svg></div><div class="ob-balance"><span id="ob-balance">0</span></div><p class="ob-record">RÉCORD: <span id="ob-best">0</span> CAJAS</p><div class="ob-attempt-section"><div class="ob-card-title">INTENTOS HOY</div><div id="ob-attempt-dots" class="ob-attempts" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><strong class="ob-free-count"><span id="ob-free">5</span> / 5</strong><p class="ob-extra-copy"><span id="ob-extra">0</span> extras · <span id="ob-remaining">5</span> disponibles</p><button class="ob-secondary ob-more" id="ob-more" type="button">⊕ OBTENER MÁS INTENTOS</button></div><p class="ob-reset">5 gratis cada día · 00:00 de Perú</p></div>
+   <div class="ob-session"><span>ESTA PARTIDA <b id="ob-score">0</b></span><span>MEJOR PARTIDA <b id="ob-best-score">0</b></span></div>
+  </aside>
+  <div class="ob-play-column">
+   <div class="ob-heading"><h2 id="ob-title" class="ob-sr-only">OVERBLACK STACK — Apila tu estilo</h2><img class="ob-title-art" src="stack-title.png" alt="OVERBLACK STACK. Apila tu estilo" width="900" height="470" decoding="async"></div>
+   <div class="ob-arena">
+    <canvas id="ob-canvas" width="600" height="780" tabindex="0" role="button" aria-label="Jugar y soltar caja. También puedes usar Espacio o Enter." aria-describedby="ob-instructions">Tu navegador necesita soporte de canvas para mostrar el juego.</canvas>
+    <div class="ob-feedback" aria-live="polite" aria-atomic="true"><strong id="ob-perfect"></strong><span id="ob-points-pop"></span></div>
+    <div class="ob-overlay" id="ob-overlay" hidden><div><small id="ob-overlay-label">BUILD YOUR LEGACY</small><h3 id="ob-overlay-title">Apila tu estilo.</h3><p id="ob-overlay-copy">Pulsa Empezar para jugar.</p></div></div>
+    <div class="ob-arena-foot"><span>OB / STACK DIVISION</span><span id="ob-speed-stage">VELOCIDAD ×1.00</span></div>
+   </div>
+   <div class="ob-controls"><button class="ob-primary" id="ob-action" type="button">EMPEZAR PARTIDA ↗</button><button class="ob-secondary" id="ob-pause" type="button" disabled>PAUSA</button></div>
+   <p class="ob-hint" id="ob-instructions">Clic / tap / Espacio para soltar · PERFECT +5 pts · Normal +2 pts</p>
+  </div>
+  <aside class="ob-sidebar" aria-label="Altura, velocidad y recompensas">
+   <div class="ob-card ob-live-stats"><div><span>ALTURA</span><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg><strong id="ob-height">0</strong></div><small>CAJAS</small></div><div><span>VELOCIDAD</span><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18a9 9 0 1 1 16 0M12 14l5-7"/><circle cx="12" cy="14" r="1"/></svg></div><strong id="ob-speed">×1.00</strong></div></div>
+   <div class="ob-card ob-how"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v4H3ZM5 12v10h14V12M12 8v14"/><path d="M12 8C3 8 4 0 8 3l4 5c9 0 8-8 4-5Z"/></svg> CÓMO JUGAR</h3><ol><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M7 7l-5 5 5 5M17 7l5 5-5 5"/></svg><span>La caja se mueve<br>de izquierda a derecha.</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="6"/><path d="M6 10h12M12 2v8"/></svg><span>Haz clic en el momento<br>exacto para soltarla.</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Si la colocas perfecta<br>ganas <b>+5 puntos.</b></span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg><span>Cada caja aumenta<br>la velocidad.</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 10 18H2Z"/><path d="M12 9v5M12 17v1"/></svg><span>Si fallas, se termina<br>la partida.</span></li></ol></div>
+   <div class="ob-card ob-reward"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v4H3ZM5 12v10h14V12M12 8v14"/><path d="M12 8C3 8 4 0 8 3l4 5c9 0 8-8 4-5Z"/></svg> DESCUENTOS CON PUNTOS</h3><div class="ob-reward-goal"><span>5,000 pts</span><span>→</span><strong>10% OFF</strong></div><p class="ob-micro">+ Intentos extra por logros</p><progress id="ob-progress" value="0" max="5000" aria-label="Progreso hacia el 10% de descuento"></progress><div class="ob-progress-copy"><span id="ob-progress-text">0 / 5,000 pts</span><span id="ob-percent">0%</span></div><p class="ob-micro" id="ob-reward-copy">Cada caja te acerca.</p><p class="ob-unlocked" id="ob-unlocked" hidden>OBJETIVO DESBLOQUEADO ↗</p><a class="ob-secondary" id="ob-claim" hidden target="_blank" rel="noopener noreferrer">SOLICITAR MI 10% OFF ↗</a><p class="ob-validation">Canje sujeto a validación de OverBlack.</p></div>
+  </aside>
+ </div>
+ <div class="ob-world-footer"><span>OVERBLACK<br>STREETWEAR<br>FOR A DARKER<br>TOMORROW.</span><p>MÁS QUE ROPA, ES UN JUEGO</p><strong aria-hidden="true">NO<br>LIMITS ↗</strong></div>
+</div>
+<div class="container ob-bottom">
+  <details id="ob-extras"><summary>MÁS INTENTOS / LOGROS, COMPRAS Y PROMOCIONES</summary><div class="ob-details-body ob-extras-grid"><div><p>Gana intentos extra al superar estas alturas. Cada logro se concede una sola vez y tus extras no caducan.</p><div id="ob-achievements"></div></div><div><p>¿Recibiste un código por una compra o promoción de OverBlack? Actívalo aquí.</p><form id="ob-promo-form"><label class="ob-promo-label" for="ob-promo-code">Código de intentos extra</label><div class="ob-code-row"><input id="ob-promo-code" autocomplete="off" spellcheck="false" required maxlength="4096" placeholder="Pega tu código OVERBLACK"><button class="ob-secondary" type="submit">ACTIVAR</button></div></form><p class="ob-promo-status" id="ob-promo-status" role="status"></p><p class="ob-micro">Los códigos los entrega la tienda tras verificar la compra o promoción. <a href="https://wa.me/51981947363?text=Hola%2C%20quiero%20consultar%20los%20intentos%20extra%20de%20OVERBLACK%20STACK." target="_blank" rel="noopener noreferrer" style="text-decoration:underline">Consultar disponibilidad ↗</a></p></div></div></details>
+
+  <p class="ob-notice" id="ob-storage-note">Primera versión · Tu avance se guarda solo en este navegador. Borrar los datos del navegador elimina el progreso. Los puntos y códigos de esta versión requieren validación de la tienda para premios reales.</p>
+  <p class="ob-notice ob-error" id="ob-error" role="status" hidden></p>
+  <noscript><p class="ob-notice">Activa JavaScript para jugar OVERBLACK STACK.</p></noscript>
+
+</div></section>
 </main>
 
 <footer>
@@ -135,6 +175,8 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 
 </div>
 </footer>
+<a class="ob-stack-quicklink" id="ob-quicklink" href="#stack" aria-label="Ir a OVERBLACK STACK">Jugar OVERBLACK STACK ↗</a>
+
 
 <div class="modal" id="modal">
 <div class="modalbox">
