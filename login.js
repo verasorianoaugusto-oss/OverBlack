@@ -1,5 +1,6 @@
 (function () {
   'use strict';
+  const accountPage=document.body.classList.contains('ob-account-page');
   const cfg = window.OBCommerceConfig || {};
   const configured = /^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(cfg.supabaseUrl || '') && !!cfg.publishableKey && !!window.OBCreateClient;
   const client = configured ? window.OBCreateClient(cfg.supabaseUrl, cfg.publishableKey) : null;
@@ -18,8 +19,8 @@
     dialog.classList.remove('ob-auth-theme');
     dialog.innerHTML = '<button class="ob-close" aria-label="Cerrar">×</button>' + html + '<p class="ob-status" role="status" aria-live="polite"></p>';
     dialog.querySelector('.ob-close').onclick = () => dialog.close();
-    if(account?.admin&&!html.includes('ob-auth-form')){const back=document.createElement('button');back.className='ob-secondary';back.textContent='Inicio ADMIN';back.onclick=()=>run(back,admin);dialog.append(back);}
-    if (!dialog.open) dialog.showModal();
+    if(account?.admin&&!html.includes('ob-auth-form')&&!html.includes('id="ob-signout"')){const back=document.createElement('button');back.className='ob-secondary';back.textContent=html.includes('id="ob-admin-stock"')?'← Mi cuenta':'← Panel ADMIN';back.onclick=()=>run(back,html.includes('id="ob-admin-stock"')?openAccount:admin);dialog.append(back);}
+    if(accountPage){dialog.setAttribute('open','');document.getElementById('ob-account-loading')?.remove();dialog.querySelector('.ob-close').hidden=true;}else if (!dialog.open) dialog.showModal();
     window.dispatchEvent(new Event('ob:dialog'));
   }
   function status(message) { const el=dialog.querySelector('.ob-status'); if(el) el.textContent=message; }
@@ -88,12 +89,7 @@
     show('<h2>OVERBLACK ADMIN</h2><div class="ob-actions"><button id="ob-admin-orders">Pedidos</button><button id="ob-admin-stock">Productos / stock</button><button id="ob-admin-shipping">Envíos</button><button id="ob-admin-customers">Clientes / puntos</button></div><p>Recompensas: 2,500 = 5%, 5,000 = 10%, 10,000 = 15%. Una por pedido, elegida por el cliente.</p>');
     document.getElementById('ob-admin-orders').onclick=()=>run(null,()=>orders(true));
     document.getElementById('ob-admin-customers').onclick=()=>run(null,async()=>{const rows=await select('ob_profiles');show('<h2>Clientes / puntos</h2>'+rows.map(p=>'<div class="ob-row"><span>'+esc(p.username||p.id)+'<br><small>Récord: '+p.best+' cajas</small></span><b>'+p.points+' pts</b></div>').join(''),true);});
-    document.getElementById('ob-admin-stock').onclick=()=>run(null,async()=>{
-      await loadAdminCatalog();show('<h2>Productos / stock</h2><form id="ob-stock-form"><label>Producto<select name="product">'+catalog.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('')+'</select></label><label>Precio S/<input name="price" type="number" step="0.01" min="0.01" required></label><label>Talla<input name="size" required maxlength="16"></label><label>Existencias<input name="stock" type="number" min="0" max="100000" required></label><label class="ob-check"><input name="active" type="checkbox"> Disponible para venta</label><button class="ob-submit">Guardar</button></form><div id="ob-stock-list"></div>');
-      const form=document.getElementById('ob-stock-form');
-      const fill=()=>{const p=catalog.find(x=>x.id===Number(form.elements.product.value));form.elements.price.value=p.price?p.price/100:'';form.elements.active.checked=p.active;document.getElementById('ob-stock-list').innerHTML=variants.filter(v=>v.product_id===p.id).map(v=>'<p>'+esc(v.size)+': '+v.stock+' unidades</p>').join('');};form.elements.product.onchange=fill;fill();
-      form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(form);await rpc('ob_inventory',{p_product:Number(f.get('product')),p_price:Math.round(Number(f.get('price'))*100),p_active:f.has('active'),p_size:f.get('size'),p_stock:Number(f.get('stock'))});await loadAdminCatalog();fill();status('Stock guardado.');});};
-    });
+    document.getElementById('ob-admin-stock').onclick=()=>run(null,()=>window.OBEditProducts({client,select,rpc,show,run,status,esc}));
     document.getElementById('ob-admin-shipping').onclick=()=>{
       show('<h2>Zonas y tarifas de envío</h2><form id="ob-shipping-form">'+['department','province','district'].map((name,i)=>'<label>'+['Departamento','Provincia','Distrito'][i]+'<input name="'+name+'" required maxlength="80"></label>').join('')+'<label>Tarifa S/<input name="fee" type="number" min="0" step="0.01" required></label><label class="ob-check"><input name="active" type="checkbox" checked> Zona activa</label><button class="ob-submit">Guardar zona</button></form>');
       document.getElementById('ob-shipping-form').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(e.target);await rpc('ob_shipping_save',{p_department:f.get('department'),p_province:f.get('province'),p_district:f.get('district'),p_fee:Math.round(Number(f.get('fee'))*100),p_active:f.has('active')});await loadAdminCatalog();status('Zona guardada.');});};
@@ -101,13 +97,25 @@
   }
 
   async function openAccount(){
+    if(!accountPage){location.href='account.html';return;}
     await ready;
     if(!user){auth();return;}
     await refresh();
     show('<h2>Hola, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p>Estamos preparando los pedidos y beneficios de tu cuenta.</p>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
     document.getElementById('ob-admin')?.addEventListener('click',()=>run(null,admin));
-    document.getElementById('ob-signout').onclick=e=>run(e.target,async()=>{const {error}=await client.auth.signOut();if(error)throw error;user=null;account=null;dialog.close();});
+    document.getElementById('ob-signout').onclick=e=>run(e.target,async()=>{const {error}=await client.auth.signOut();if(error)throw error;user=null;account=null;auth();});
   }
+
+  async function syncProductCards(){
+    const [rows,sizes]=await Promise.all([select('ob_products'),select('ob_variants')]);
+    const update=()=>document.querySelectorAll('#grid .product').forEach(card=>{
+      const p=rows.find(p=>p.name===card.querySelector('h3')?.textContent);if(!p)return;
+      if(p.image_path){const photo=card.querySelector('.photo');photo.innerHTML='';const img=document.createElement('img');img.alt=p.name;img.src=client.storage.from('product-images').getPublicUrl(p.image_path).data.publicUrl;img.style.cssText='width:100%;height:100%;object-fit:contain';photo.append(img);}
+      if(p.price){card.querySelector('.price').textContent=money(p.price);let label=card.querySelector('.ob-availability');if(!label){label=document.createElement('p');label.className='ob-availability';card.querySelector('.price').after(label);}const vs=sizes.filter(v=>v.product_id===p.id&&v.stock>0);label.textContent=p.active&&vs.length?'En stock · Tallas: '+vs.map(v=>v.size).join(', '):'Sin stock';}
+    });
+    update();const grid=document.getElementById('grid');if(grid)new MutationObserver(update).observe(grid,{childList:true});
+  }
+
   let dismissed=false;
   try{dismissed=sessionStorage.getItem('ob.login.dismissed')==='1';}catch{}
   dialog.addEventListener('close',()=>{try{sessionStorage.setItem('ob.login.dismissed','1');}catch{}});
@@ -124,6 +132,7 @@
       }
     }catch{user=null;}
     finally{authReady();}
-    if(!user&&!dismissed&&!recovery)auth();
+    if(accountPage&&!recovery)run(null,openAccount);else if(!user&&!dismissed&&!recovery)auth();
+    if(!accountPage&&client)syncProductCards().catch(()=>{});
   })();
 })();
