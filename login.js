@@ -18,6 +18,7 @@
     dialog.classList.remove('ob-auth-theme');
     dialog.innerHTML = '<button class="ob-close" aria-label="Cerrar">×</button>' + html + '<p class="ob-status" role="status" aria-live="polite"></p>';
     dialog.querySelector('.ob-close').onclick = () => dialog.close();
+    if(account?.admin&&!html.includes('ob-auth-form')){const back=document.createElement('button');back.className='ob-secondary';back.textContent='Inicio ADMIN';back.onclick=()=>run(back,admin);dialog.append(back);}
     if (!dialog.open) dialog.showModal();
     window.dispatchEvent(new Event('ob:dialog'));
   }
@@ -72,11 +73,39 @@
     };
   }
 
+  async function loadAdminCatalog(){[catalog,variants,shipping]=await Promise.all([select('ob_products'),select('ob_variants'),select('ob_shipping')]);}
+  const statusLabels={nuevo:'Nuevo',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
+  async function orders(isAdmin) {
+    await refresh();if(!account?.admin)throw Error('Acceso denegado.');
+    let query=client.from('ob_orders').select('*,ob_order_items(*)').order('created_at',{ascending:false}).limit(100);
+    if(!isAdmin)query=query.eq('user_id',user.id);
+    const {data,error}=await query;if(error)throw error;
+    show('<h2>'+ (isAdmin?'OVERBLACK ADMIN · Pedidos':'Mis pedidos')+'</h2>'+(!data.length?'<p>No hay pedidos.</p>':'')+data.map(o=>'<div class="ob-row"><div><b>#OB-'+String(o.id).padStart(5,'0')+' · '+esc(statusLabels[o.status])+'</b><p>'+o.ob_order_items.map(i=>esc(i.name)+' / '+esc(i.size)+' × '+i.quantity).join('<br>')+'</p><p>'+money(o.total)+' · '+(o.status==='entregado'?'Pagado':o.status==='cancelado'?'Cancelado':'Contra entrega — por cobrar')+'<br>'+esc(o.delivery.recipient)+' · '+esc(o.delivery.phone)+'<br>'+esc(o.delivery.address)+' · '+esc(o.delivery.district)+'<br>'+esc(o.delivery.reference)+'</p>'+(isAdmin&&!['entregado','cancelado'].includes(o.status)?'<div class="ob-actions">'+({nuevo:['preparando','cancelado'],preparando:['enviado','cancelado'],enviado:['entregado','cancelado']}[o.status]||[]).map(s=>'<button data-order="'+o.id+'" data-status="'+s+'">'+statusLabels[s]+'</button>').join('')+'</div>':'')+'</div></div>').join(''),true);
+    dialog.querySelectorAll('[data-order]').forEach(b=>b.onclick=()=>run(b,async()=>{if(b.dataset.status==='cancelado'&&!confirm('¿Cancelar este pedido y devolver stock y puntos?'))return;if(b.dataset.status==='entregado'&&!confirm('¿Confirmas que el pedido fue entregado y cobrado?'))return;await rpc('ob_order_status',{p_order:Number(b.dataset.order),p_status:b.dataset.status});await orders(true);}));
+  }
+  async function admin() {
+    await refresh();if(!account?.admin)throw Error('Acceso denegado.');
+    show('<h2>OVERBLACK ADMIN</h2><div class="ob-actions"><button id="ob-admin-orders">Pedidos</button><button id="ob-admin-stock">Productos / stock</button><button id="ob-admin-shipping">Envíos</button><button id="ob-admin-customers">Clientes / puntos</button></div><p>Recompensas: 2,500 = 5%, 5,000 = 10%, 10,000 = 15%. Una por pedido, elegida por el cliente.</p>');
+    document.getElementById('ob-admin-orders').onclick=()=>run(null,()=>orders(true));
+    document.getElementById('ob-admin-customers').onclick=()=>run(null,async()=>{const rows=await select('ob_profiles');show('<h2>Clientes / puntos</h2>'+rows.map(p=>'<div class="ob-row"><span>'+esc(p.username||p.id)+'<br><small>Récord: '+p.best+' cajas</small></span><b>'+p.points+' pts</b></div>').join(''),true);});
+    document.getElementById('ob-admin-stock').onclick=()=>run(null,async()=>{
+      await loadAdminCatalog();show('<h2>Productos / stock</h2><form id="ob-stock-form"><label>Producto<select name="product">'+catalog.map(p=>'<option value="'+p.id+'">'+esc(p.name)+'</option>').join('')+'</select></label><label>Precio S/<input name="price" type="number" step="0.01" min="0.01" required></label><label>Talla<input name="size" required maxlength="16"></label><label>Existencias<input name="stock" type="number" min="0" max="100000" required></label><label class="ob-check"><input name="active" type="checkbox"> Disponible para venta</label><button class="ob-submit">Guardar</button></form><div id="ob-stock-list"></div>');
+      const form=document.getElementById('ob-stock-form');
+      const fill=()=>{const p=catalog.find(x=>x.id===Number(form.elements.product.value));form.elements.price.value=p.price?p.price/100:'';form.elements.active.checked=p.active;document.getElementById('ob-stock-list').innerHTML=variants.filter(v=>v.product_id===p.id).map(v=>'<p>'+esc(v.size)+': '+v.stock+' unidades</p>').join('');};form.elements.product.onchange=fill;fill();
+      form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(form);await rpc('ob_inventory',{p_product:Number(f.get('product')),p_price:Math.round(Number(f.get('price'))*100),p_active:f.has('active'),p_size:f.get('size'),p_stock:Number(f.get('stock'))});await loadAdminCatalog();fill();status('Stock guardado.');});};
+    });
+    document.getElementById('ob-admin-shipping').onclick=()=>{
+      show('<h2>Zonas y tarifas de envío</h2><form id="ob-shipping-form">'+['department','province','district'].map((name,i)=>'<label>'+['Departamento','Provincia','Distrito'][i]+'<input name="'+name+'" required maxlength="80"></label>').join('')+'<label>Tarifa S/<input name="fee" type="number" min="0" step="0.01" required></label><label class="ob-check"><input name="active" type="checkbox" checked> Zona activa</label><button class="ob-submit">Guardar zona</button></form>');
+      document.getElementById('ob-shipping-form').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(e.target);await rpc('ob_shipping_save',{p_department:f.get('department'),p_province:f.get('province'),p_district:f.get('district'),p_fee:Math.round(Number(f.get('fee'))*100),p_active:f.has('active')});await loadAdminCatalog();status('Zona guardada.');});};
+    };
+  }
+
   async function openAccount(){
     await ready;
     if(!user){auth();return;}
     await refresh();
-    show('<h2>Hola, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p>Estamos preparando los pedidos y beneficios de tu cuenta.</p><button id="ob-signout">Cerrar sesión</button>');
+    show('<h2>Hola, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p>Estamos preparando los pedidos y beneficios de tu cuenta.</p>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
+    document.getElementById('ob-admin')?.addEventListener('click',()=>run(null,admin));
     document.getElementById('ob-signout').onclick=e=>run(e.target,async()=>{const {error}=await client.auth.signOut();if(error)throw error;user=null;account=null;dialog.close();});
   }
   let dismissed=false;
