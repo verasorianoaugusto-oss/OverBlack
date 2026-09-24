@@ -1,0 +1,66 @@
+/* Scoped to new account/checkout surfaces. Existing storefront CSS stays intact. */
+.ob-commerce-dialog{color:#f5f5f5;background:#080808;border:1px solid #444;border-radius:8px;padding:28px;width:min(440px,calc(100% - 28px));max-height:90dvh;margin:auto;box-shadow:0 0 24px #ffffff18;font:14px Arial,sans-serif}
+.ob-commerce-dialog::backdrop{background:#000b}
+.ob-commerce-dialog.ob-wide{width:min(760px,calc(100% - 28px))}
+.ob-commerce-dialog h2{font-size:23px;margin:14px 0 8px}.ob-commerce-dialog h3{margin:22px 0 10px}
+.ob-commerce-dialog p{color:#aaa;line-height:1.6;margin:10px 0}
+.ob-commerce-dialog label{display:block;margin:14px 0 5px;color:#ccc;font-size:12px}
+.ob-commerce-dialog input:not([type=checkbox]),.ob-commerce-dialog select,.ob-commerce-dialog textarea{display:block;width:100%;padding:12px;color:#fff;background:#141416;border:1px solid #363638;border-radius:5px;font:14px Arial}
+.ob-commerce-dialog button,.ob-commerce-dialog .ob-link{cursor:pointer;padding:11px 14px;background:#fff;color:#090909;border:1px solid #888;border-radius:4px;font-weight:700}
+.ob-commerce-dialog button:disabled{opacity:.45;cursor:wait}
+.ob-commerce-dialog .ob-secondary{background:#111;color:#eee}
+.ob-commerce-dialog .ob-close{float:right;background:none;color:#fff;font-size:24px;border:0;padding:0 0 8px 12px}
+.ob-commerce-dialog .ob-actions{display:flex;flex-wrap:wrap;gap:10px;margin:20px 0 8px}
+.ob-commerce-dialog .ob-submit{width:100%;margin-top:22px}
+.ob-commerce-dialog .ob-row{border-bottom:1px solid #333;padding:12px 0;display:flex;justify-content:space-between;gap:12px;align-items:center}
+.ob-commerce-dialog .ob-status{color:#d5ff63;white-space:pre-line}
+.ob-commerce-dialog .ob-auth-brand{text-align:center;font-size:30px;font-weight:900;font-style:italic;letter-spacing:-2px;margin:20px 0}
+.ob-commerce-dialog .ob-auth-caption{text-align:center;font-size:11px;letter-spacing:1px}
+.ob-commerce-dialog .ob-check{display:flex;align-items:center;gap:9px}
+.ob-commerce-dialog .ob-check a{text-decoration:underline}
+.ob-commerce-dialog .ob-columns{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ob-account-trigger{font:inherit;font-size:11px;color:#eee;background:transparent;border:0;cursor:pointer;padding:7px}
+.ob-commerce-dialog small{color:#aaa}
+@media(max-width:520px){.ob-commerce-dialog{padding:20px}.ob-commerce-dialog .ob-columns{grid-template-columns:1fr}.ob-account-trigger{font-size:10px}}
+
+/* User-supplied city photograph. CSS crops it without altering the original asset. */
+.ob-commerce-dialog.ob-auth-theme{
+  --auth-accent:#ff6871;
+  padding:30px 32px 24px;
+  border:1px solid #594044;border-top:3px solid #e52e3c;border-radius:3px;
+  background-color:#09090b;
+  background-image:linear-gradient(180deg,#08080b66 0%,#08080b99 28%,#08080bd9 49%,#08080bed 100%),url("login-city.png");
+  background-size:cover;
+  background-position:center,center 34%;
+  background-repeat:no-repeat;
+  box-shadow:0 24px 100px #000c,0 0 40px #e52e3c14;
+}
+.ob-auth-theme::backdrop{background:#000c;backdrop-filter:blur(5px)}
+.ob-auth-theme .ob-close{position:absolute;right:15px;top:13px;float:none;width:32px;height:32px;padding:0;color:#fff;background:#09090bc9;font-weight:400}
+.ob-auth-theme .ob-close:hover{color:var(--auth-accent);background:#270c12}
+.ob-auth-theme .ob-auth-edition{display:flex;justify-content:space-between;gap:12px;margin:0 28px 26px 0;font:9px monospace;letter-spacing:1.5px;color:#e4dadd;text-shadow:0 1px 5px #000}
+.ob-auth-theme .ob-auth-brand{display:flex;align-items:center;justify-content:center;gap:12px;margin:0 0 16px;font-size:34px;line-height:1;letter-spacing:-1.8px;text-shadow:0 3px 15px #000}
+.ob-auth-theme .ob-auth-brand img{width:58px;height:48px;object-fit:contain}
+.ob-auth-theme .ob-auth-word{color:var(--auth-accent)}
+.ob-auth-theme .ob-auth-stamp{width:fit-content;margin:0 auto 28px;padding:5px 10px;background:var(--auth-accent);color:#17090b;font:900 9px Arial,sans-serif;letter-spacing:1.8px;transform:rotate(-3deg);box-shadow:3px 3px 0 #e52e3c33}
+.ob-auth-theme .ob-auth-title{text-align:center;font-size:25px;letter-spacing:-.6px;margin:0 0 7px}
+.ob-auth-theme .ob-auth-caption{text-align:center;font-size:9px;letter-spacing:2.2px;color:#d1c5c8;margin:0 0 25px;text-shadow:0 1px 5px #000}
+.ob-auth-theme label{color:#e0d7da;font-size:11px;letter-spacing:.2px;margin-top:16px}
+.ob-auth-theme input:not([type=checkbox]){margin-top:7px;background:#101014f2;border:1px solid #4b3b40;border-radius:2px;padding:13px 14px;box-shadow:inset 3px 0 0 #ff687126}
+.ob-auth-theme input:not([type=checkbox]):focus{border-color:var(--auth-accent);outline:2px solid #ff687140;outline-offset:2px;box-shadow:inset 3px 0 0 var(--auth-accent)}
+.ob-auth-theme input[type=checkbox]{accent-color:var(--auth-accent);flex-shrink:0;width:15px;height:15px}
+.ob-auth-theme .ob-check{display:block;line-height:1.9;letter-spacing:0}
+.ob-auth-theme .ob-check input{vertical-align:middle;margin-right:7px}
+.ob-auth-theme .ob-submit{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--auth-accent);border:1px solid var(--auth-accent);border-radius:2px;color:#17090b;padding:14px 17px;font-size:12px;letter-spacing:1px;box-shadow:4px 4px 0 #e52e3c26;transition:background .15s,box-shadow .15s}
+.ob-auth-theme .ob-submit span{font-size:20px;line-height:1}
+.ob-auth-theme .ob-submit:hover:not(:disabled){background:#ff8c93;box-shadow:4px 4px 0 #e52e3c44}
+.ob-auth-theme .ob-actions{justify-content:center;align-items:center;gap:8px 16px;margin:17px 0 22px}
+.ob-auth-theme .ob-secondary{background:none;border:0;border-bottom:1px solid #6b5058;border-radius:0;padding:5px 0;font-size:11px;color:#e2d7da;font-weight:400}
+.ob-auth-theme .ob-secondary:hover{color:var(--auth-accent);border-color:var(--auth-accent)}
+.ob-auth-theme .ob-auth-footer{display:flex;align-items:center;justify-content:center;gap:10px;border-top:1px solid #493039;padding-top:17px;font-size:8px;letter-spacing:1.8px;color:#bdaeb3}
+.ob-auth-theme .ob-auth-footer span{font-size:19px;color:var(--auth-accent)}
+.ob-auth-theme .ob-status:empty{display:none}
+.ob-auth-theme .ob-status:not(:empty){border-left:2px solid var(--auth-accent);background:#180d12ed;color:#ffd0d4;padding:10px 12px;font-size:12px;margin-top:18px}
+.ob-auth-theme button:focus-visible,.ob-auth-theme a:focus-visible{outline:2px solid var(--auth-accent);outline-offset:4px}
+@media(max-width:520px){.ob-commerce-dialog.ob-auth-theme{padding:25px 22px 20px}.ob-auth-theme .ob-auth-brand{font-size:29px;gap:9px}.ob-auth-theme .ob-auth-brand img{width:47px;height:40px}.ob-auth-theme .ob-auth-edition{font-size:8px;letter-spacing:1px}.ob-auth-theme .ob-auth-footer{font-size:7px;letter-spacing:1.3px}}
+@media(prefers-reduced-motion:reduce){.ob-auth-theme .ob-submit{transition:none}}
