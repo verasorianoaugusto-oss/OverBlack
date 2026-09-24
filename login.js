@@ -110,6 +110,7 @@
     const [rows,sizes]=await Promise.all([select('ob_products'),select('ob_variants')]);
     const update=()=>document.querySelectorAll('#grid .product').forEach(card=>{
       const p=rows.find(p=>p.name===card.querySelector('h3')?.textContent);if(!p)return;
+      card.hidden=!!p.archived;if(p.archived)return;
       if(p.image_path){const photo=card.querySelector('.photo');photo.innerHTML='';const img=document.createElement('img');img.alt=p.name;img.src=client.storage.from('product-images').getPublicUrl(p.image_path).data.publicUrl;img.style.cssText='width:100%;height:100%;object-fit:contain';photo.append(img);}
       if(p.price){card.querySelector('.price').textContent=money(p.price);let label=card.querySelector('.ob-availability');if(!label){label=document.createElement('p');label.className='ob-availability';card.querySelector('.price').after(label);}const vs=sizes.filter(v=>v.product_id===p.id&&v.stock>0);label.textContent=p.active&&vs.length?'En stock · Tallas: '+vs.map(v=>v.size).join(', '):'Sin stock';}
     });
