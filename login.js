@@ -41,17 +41,9 @@
       (!reset?'<label>Correo electrónico<input type="email" name="email" autocomplete="email" required maxlength="254"></label>':'')+
       (!recover?'<label>Contraseña<input type="password" name="password" autocomplete="'+(signup||reset?'new-password':'current-password')+'" required minlength="8" maxlength="128"></label>':'')+
       (signup||reset?'<label>Confirmar contraseña<input type="password" name="confirm" autocomplete="new-password" required minlength="8" maxlength="128"></label>':'')+
-      (signup?'<label class="ob-check"><input type="checkbox" name="terms" required> Acepto los <a id="ob-terms">Términos y Condiciones</a> y la <a id="ob-privacy">Privacidad</a></label>':'')+
+      (signup?'<p class="ob-auth-notice">Tu nombre de usuario y correo se usarán para gestionar tu cuenta. Supabase procesa el registro y la autenticación. Te enviaremos un correo para confirmar tu dirección.</p>':'')+
       '<button class="ob-submit">'+(signup?'CREAR CUENTA':recover?'ENVIAR ENLACE':reset?'GUARDAR CONTRASEÑA':'INICIAR SESIÓN')+' <span aria-hidden="true">↗</span></button></form><div class="ob-actions"><button class="ob-secondary" id="ob-switch">'+(signup||recover||reset?'Iniciar sesión':'Crear cuenta')+'</button>'+(!signup&&!recover&&!reset?'<button class="ob-secondary" id="ob-recover">Olvidé mi contraseña</button>':'')+'</div><div class="ob-auth-footer"><span aria-hidden="true">✳</span> SÉ PARTE DE ALGO MÁS GRANDE</div>');
     dialog.classList.add('ob-auth-theme');
-    if(signup)status('El registro se activará próximamente. Mientras tanto puedes seguir navegando por la tienda.');
-    if(signup) {
-      for(const [id,url] of [['ob-terms',cfg.termsUrl],['ob-privacy',cfg.privacyUrl]]) {
-        const a=document.getElementById(id);
-        if(url && /^https:\/\//.test(url)){a.href=url;a.target='_blank';a.rel='noopener';}
-        else a.onclick=()=>status('La tienda aún debe publicar sus términos y privacidad antes de abrir registros.');
-      }
-    }
     document.getElementById('ob-switch').onclick=()=>auth(signup||recover||reset?'login':'signup');
     document.getElementById('ob-recover')?.addEventListener('click',()=>auth('recover'));
     document.getElementById('ob-auth-form').onsubmit=e=>{
@@ -62,12 +54,18 @@
         const redirect=new URL('index.html',location.href).href;
         let result;
         if(signup) {
-          if(!cfg.termsUrl||!cfg.privacyUrl)throw Error('La tienda aún está preparando sus términos y privacidad.');
           result=await client.auth.signUp({email:f.get('email'),password:f.get('password'),options:{emailRedirectTo:redirect,data:{username:f.get('username')}}});
         } else if(recover) result=await client.auth.resetPasswordForEmail(f.get('email'),{redirectTo:redirect});
         else if(reset) result=await client.auth.updateUser({password:f.get('password')});
         else result=await client.auth.signInWithPassword({email:f.get('email'),password:f.get('password')});
-        if(result.error)throw result.error;
+        if(result.error){
+          const code=result.error.code;
+          if(code==='email_address_not_authorized'||code==='unexpected_failure'&&/email/i.test(result.error.message))throw Error('No pudimos enviar la confirmación. La tienda necesita terminar de configurar su servicio de correo.');
+          if(code==='over_email_send_rate_limit')throw Error('Se alcanzó el límite temporal de correos. Espera unos minutos antes de volver a intentarlo.');
+          if(code==='email_not_confirmed')throw Error('Confirma tu correo antes de iniciar sesión. Revisa también spam.');
+          if(code==='invalid_credentials')throw Error('El correo o la contraseña no son correctos.');
+          throw result.error;
+        }
         if(signup||recover)status('Revisa tu correo para continuar. Si no aparece, revisa también spam.');
         else {user=result.data.user||user;await refresh();await openAccount();}
       });
