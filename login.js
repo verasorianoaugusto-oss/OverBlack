@@ -81,17 +81,17 @@
           throw result.error;
         }
         if(signup&&!result.data.session)confirmationPending(f.get('email'));
-        else if(recover)status('Revisa tu correo para continuar. Si no aparece, revisa también spam.');
+        else if(recover)confirmationPending(f.get('email'),true);
         else {user=result.data.user||user;await refresh();await openAccount();}
       });
     };
   }
 
-  function confirmationPending(email) {
-    show('<section class="ob-confirmation" aria-labelledby="ob-confirm-title"><div class="ob-confirm-icon" aria-hidden="true">✉</div><p class="ob-confirm-label">UN PASO MÁS PARA ENTRAR</p><h2 id="ob-confirm-title" tabindex="-1">Confirma tu correo</h2><p>Revisa el correo que usaste para registrarte:</p><strong class="ob-confirm-email">'+esc(email)+'</strong><div class="ob-confirm-wait" role="status">Pendiente de confirmación</div><ol><li>Abre el mensaje de <strong>OverBlack</strong>.</li><li>Pulsa <strong>CONFIRMAR MI CUENTA</strong> en el correo.</li><li>Después, vuelve aquí e inicia sesión.</li></ol><p class="ob-confirm-help">¿No lo encuentras? Revisa Spam o Correo no deseado. Puede tardar unos minutos.</p><button class="ob-submit" id="ob-confirm-login">YA CONFIRMÉ · INICIAR SESIÓN <span aria-hidden="true">↗</span></button><button class="ob-secondary" id="ob-confirm-back">Corregir mi correo</button><a class="ob-confirm-shop" href="index.html">Seguir viendo la tienda</a></section>');
+  function confirmationPending(email, recover=false) {
+    show('<section class="ob-confirmation" aria-labelledby="ob-confirm-title"><div class="ob-confirm-icon" aria-hidden="true">✉</div><p class="ob-confirm-label">'+(recover?'RECUPERA EL ACCESO A TU CUENTA':'UN PASO MÁS PARA ENTRAR')+'</p><h2 id="ob-confirm-title" tabindex="-1">'+(recover?'Revisa tu correo':'Confirma tu correo')+'</h2><p>'+(recover?'Si hay una cuenta asociada, recibirás un enlace de recuperación en:':'Revisa el correo que usaste para registrarte:')+'</p><strong class="ob-confirm-email">'+esc(email)+'</strong><div class="ob-confirm-wait" role="status">'+(recover?'Continúa desde el enlace del correo':'Pendiente de confirmación')+'</div><ol><li>'+(recover?'Abre el mensaje de recuperación de tu cuenta.':'Abre el mensaje de <strong>OverBlack</strong>.')+'</li>'+(recover?'<li>Pulsa el enlace para restablecer tu contraseña.</li><li>Elige y guarda tu nueva contraseña en la página que se abre.</li>':'<li>Pulsa <strong>CONFIRMAR MI CUENTA</strong> en el correo.</li><li>Después, vuelve aquí e inicia sesión.</li>')+'</ol><p class="ob-confirm-help">¿No lo encuentras? Revisa Spam o Correo no deseado. Puede tardar unos minutos.</p><button class="ob-submit" id="ob-confirm-login">'+(recover?'VOLVER A INICIAR SESIÓN':'YA CONFIRMÉ · INICIAR SESIÓN')+' <span aria-hidden="true">↗</span></button><button class="ob-secondary" id="ob-confirm-back">Corregir mi correo</button><a class="ob-confirm-shop" href="index.html">Seguir viendo la tienda</a></section>');
     dialog.classList.add('ob-auth-theme');
     document.getElementById('ob-confirm-login').onclick=()=>{auth();dialog.querySelector('input[name="email"]').value=email;};
-    document.getElementById('ob-confirm-back').onclick=()=>auth('signup');
+    document.getElementById('ob-confirm-back').onclick=()=>auth(recover?'recover':'signup');
     dialog.scrollTop=0;
     document.getElementById('ob-confirm-title').focus({preventScroll:true});
     if(accountPage)dialog.scrollIntoView({block:'start'});
