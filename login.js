@@ -13,6 +13,8 @@
   dialog.className = 'ob-commerce-dialog';
   dialog.setAttribute('aria-label', 'Mi cuenta OVERBLACK');
   document.body.append(dialog);
+  const sidebar=accountPage?document.createElement('nav'):null;
+  if(sidebar){sidebar.className='ob-account-sidebar';sidebar.setAttribute('aria-label','Opciones de mi cuenta');document.body.append(sidebar);}
   dialog.addEventListener('click', e => { if(e.target === dialog) { const r=dialog.getBoundingClientRect(); if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom) dialog.close(); } });
   function show(html, wide=false) {
     dialog.classList.toggle('ob-wide', wide);
@@ -21,6 +23,16 @@
     dialog.querySelector('.ob-close').onclick = () => dialog.close();
     if(account?.admin&&!html.includes('ob-auth-form')&&!html.includes('id="ob-signout"')){const back=document.createElement('button');back.className='ob-secondary';back.textContent=html.includes('id="ob-admin-stock"')?'← Mi cuenta':'← Panel ADMIN';back.onclick=()=>run(back,html.includes('id="ob-admin-stock"')?openAccount:admin);dialog.append(back);}
     if(accountPage){dialog.setAttribute('open','');document.getElementById('ob-account-loading')?.remove();dialog.querySelector('.ob-close').hidden=true;}else if (!dialog.open) dialog.showModal();
+    if(sidebar){
+      sidebar.replaceChildren();const label=document.createElement('p');label.textContent='TU ESPACIO OVERBLACK';sidebar.append(label);
+      const home=document.createElement('button');home.textContent='Mi cuenta';home.onclick=()=>run(home,openAccount);sidebar.append(home);
+      if(!html.includes('ob-auth-form')){
+        const actions=dialog.querySelector('.ob-actions');if(actions)sidebar.append(actions);
+        for(const id of ['ob-admin','ob-signout']){const button=dialog.querySelector('#'+id);if(button)sidebar.append(button);}
+        for(const button of [...dialog.children])if(button.tagName==='BUTTON'&&!button.classList.contains('ob-close')){if(button.textContent==='← Mi cuenta')button.remove();else sidebar.append(button);}
+      }
+      const shop=document.createElement('a');shop.href='index.html';shop.textContent='← Volver a la tienda';sidebar.append(shop);
+    }
     window.dispatchEvent(new Event('ob:dialog'));
   }
   function status(message) { const el=dialog.querySelector('.ob-status'); if(el) el.textContent=message; }
