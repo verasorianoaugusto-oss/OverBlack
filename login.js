@@ -98,7 +98,7 @@
   }
   async function admin() {
     await refresh();if(!account?.admin)throw Error('Acceso denegado.');
-    show('<h2>OVERBLACK ADMIN</h2><div class="ob-actions"><button id="ob-admin-orders">Pedidos</button><button id="ob-admin-stock">Productos / stock</button><button id="ob-admin-shipping">Envíos</button><button id="ob-admin-customers">Clientes / puntos</button></div><p>Recompensas: 2,500 = 5%, 5,000 = 10%, 10,000 = 15%. Una por pedido, elegida por el cliente.</p>');
+    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>OVERBLACK ADMIN</p><div class="ob-actions"><button id="ob-admin-orders">Pedidos</button><button id="ob-admin-stock">Productos / stock</button><button id="ob-admin-shipping">Envíos</button><button id="ob-admin-customers">Clientes / puntos</button></div><p>Recompensas: 2,500 = 5%, 5,000 = 10%, 10,000 = 15%. Una por pedido, elegida por el cliente.</p>');
     document.getElementById('ob-admin-orders').onclick=()=>run(null,()=>orders(true));
     document.getElementById('ob-admin-customers').onclick=()=>run(null,async()=>{const rows=await select('ob_profiles');show('<h2>Clientes / puntos</h2>'+rows.map(p=>'<div class="ob-row"><span>'+esc(p.username||p.id)+'<br><small>Récord: '+p.best+' cajas</small></span><b>'+p.points+' pts</b></div>').join(''),true);});
     document.getElementById('ob-admin-stock').onclick=()=>run(null,()=>window.OBEditProducts({client,select,rpc,show,run,status,esc}));
@@ -113,7 +113,7 @@
     await ready;
     if(!user){auth();return;}
     await refresh();
-    show('<h2>Hola, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p>Estamos preparando los pedidos y beneficios de tu cuenta.</p>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
+    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p>Estamos preparando los pedidos y beneficios de tu cuenta.</p>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
     document.getElementById('ob-admin')?.addEventListener('click',()=>run(null,admin));
     document.getElementById('ob-signout').onclick=e=>run(e.target,async()=>{const {error}=await client.auth.signOut();if(error)throw error;user=null;account=null;auth();});
   }
