@@ -65,3 +65,10 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Acceso al navegador restablecido; publicación de este bloque en curso. No equivale a completar toda la lista.
 
 - Publicación confirmada: d773ada, Mi Cuenta/Mis descuentos visible en OVERBLACK.store. Fotos de productos: optimización WebP hasta 1600 px preparada; conserva original si la conversión no reduce peso o no es compatible. Verificación de sintaxis realizada; prueba visual de carga reservada al cierre.
+
+## ADMIN Productos — 29 septiembre
+- Ampliación de ob_products (sin tablas nuevas): descripción y fotos adicionales; categorías nuevas desde el formulario existente.
+- Galería ADMIN: hasta 8 fotos, principal seleccionable, quitar de galería sin borrar originales, compresión al subir y prevención de sobrescritura si otra persona cambió las fotos.
+- Catálogo: categorías sincronizadas, descripción, galería y ampliación dentro de la interfaz actual.
+- Migración overblack_product_descriptions_categories_gallery aplicada. Comprobación mínima con transacción revertida: guardar descripción/categoría y galería mediante rol ADMIN funciona; no se modificó mercancía existente.
+- Sintaxis JS correcta; pruebas completas de carga, concurrencia y móvil pendientes del bloque final. Asesores de seguridad sin avisos nuevos; se mantienen los dos avisos previamente documentados.
