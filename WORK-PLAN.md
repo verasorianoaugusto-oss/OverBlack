@@ -63,3 +63,5 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Interfaz: actualización compartida del saldo, protección contra respuestas antiguas, historial paginado y Mis descuentos con recompensas utilizadas/devueltas por pedido.
 - Verificación técnica mínima de JavaScript correcta. Las 21 pruebas de base de datos previas corresponden al bloque anterior; pruebas completas y recorrido de compra reservados para el final por indicación del propietario.
 - Acceso al navegador restablecido; publicación de este bloque en curso. No equivale a completar toda la lista.
+
+- Publicación confirmada: d773ada, Mi Cuenta/Mis descuentos visible en OVERBLACK.store. Fotos de productos: optimización WebP hasta 1600 px preparada; conserva original si la conversión no reduce peso o no es compatible. Verificación de sintaxis realizada; prueba visual de carga reservada al cierre.

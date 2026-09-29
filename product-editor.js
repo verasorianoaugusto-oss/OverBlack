@@ -18,9 +18,22 @@ window.OBEditProducts=async function({client,select,rpc,show,run,status,esc}){
   visibility.onclick=()=>run(visibility,async()=>{const p=current(),hidden=!p.archived;await rpc('ob_product_visibility',{p_product:p.id,p_hidden:hidden});p.archived=hidden;if(hidden)p.active=false;fill();status(hidden?'Producto quitado de la tienda. Su foto, tallas e historial se conservan.':'Producto visible de nuevo. Revisa el stock y marca Disponible para venta cuando corresponda.');});
   f.product.onchange=fill;f.size.oninput=pickSize;f.available.onchange=availability;
   f.photo.onchange=()=>{const file=f.photo.files[0];if(!file)return;if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5242880){f.photo.value='';status('Elige JPG, PNG o WebP de hasta 5 MB.');return;}if(objectURL)URL.revokeObjectURL(objectURL);objectURL=URL.createObjectURL(file);preview.src=objectURL;preview.hidden=false;};
+  async function optimizePhoto(file){
+    if(!window.createImageBitmap)return file;
+    let bitmap;
+    try{
+      bitmap=await createImageBitmap(file);
+      const scale=Math.min(1,1600/Math.max(bitmap.width,bitmap.height));
+      const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+      const context=canvas.getContext('2d');if(!context)return file;
+      context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+      const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.86));
+      return blob?.type==='image/webp'&&blob.size<file.size?blob:file;
+    }catch{return file;}finally{bitmap?.close();}
+  }
   form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const p=current(),file=f.photo.files[0],price=Math.round(Number(f.price.value)*100),size=f.size.value.trim(),stock=f.available.checked?Number(f.stock.value):0,active=f.active.checked;let path=p.image_path;
     if(!size||!Number.isInteger(stock)||stock<0||stock>100000)throw Error('Revisa la talla y la cantidad.');
-    if(file){if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5242880)throw Error('Imagen no válida.');path=p.id+'/'+crypto.randomUUID()+'.'+({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[file.type]);const {error}=await client.storage.from('product-images').upload(path,file,{contentType:file.type,upsert:false});if(error)throw error;}
+    if(file){if(!['image/jpeg','image/png','image/webp'].includes(file.type)||file.size>5242880)throw Error('Imagen no válida.');status('Preparando y guardando la foto…');const photo=await optimizePhoto(file);path=p.id+'/'+crypto.randomUUID()+'.'+({'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}[photo.type]);const {error}=await client.storage.from('product-images').upload(path,photo,{contentType:photo.type,upsert:false});if(error)throw error;}
     await rpc('ob_product_save',{p_product:p.id,p_price:price,p_active:active,p_size:size,p_stock:stock,p_image:path});
     p.price=price;p.active=active;p.image_path=path;const v=variants.find(v=>v.product_id===p.id&&v.size===size);if(v)v.stock=stock;else variants.push({product_id:p.id,size,stock});fill();f.size.value=size;pickSize();status('Foto, precio y stock guardados. Puedes añadir otra talla.');
   });};fill();
