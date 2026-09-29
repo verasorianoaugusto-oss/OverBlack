@@ -1,8 +1,8 @@
 exclude:
-  - database
-  - supabase
-  - tests
-  - internal
+  - database/
+  - supabase/
+  - tests/
+  - internal/
   - WORK-PLAN.md
   - package.json
   - pnpm-lock.yaml
