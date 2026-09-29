@@ -25,6 +25,7 @@
     document.querySelector('#stack .ob-reset').textContent=daily+' gratis cada día · 00:00 de Perú';
     document.querySelector('#stack .ob-hint').textContent='Clic / tap / Espacio para soltar · PERFECT +'+(p.perfect_points||5)+' pts · Normal +'+(p.normal_points||2)+' pts';
     document.querySelector('#stack .ob-reward-goal').textContent=rewards.map(([pts,pct])=>fmt(pts)+' = '+pct+'%').join(' · ');
+    const duplicate=document.querySelector('#stack .ob-reward-goal + .ob-micro');if(duplicate)duplicate.hidden=true;
     [...$('attempt-dots').children].forEach((dot,i)=>dot.classList.toggle('spent',i<p.used));
     const target=(rewards.find(r=>p.points<r[0])||rewards.at(-1))[0];
     $('progress').max=target;$('progress').value=Math.min(target,p.points);$('progress-text').textContent=fmt(p.points)+' / '+fmt(target)+' pts';
@@ -223,7 +224,6 @@
     if (!visible) pause(); else { lastFrame = 0; schedule(); }
   }, { threshold: 0 }).observe(canvas);
   new IntersectionObserver(entries => { $('quicklink').hidden = entries[0].isIntersecting; }, { threshold: 0 }).observe(document.getElementById('stack'));
-  setInterval(() => { if(C.user)C.refresh().catch(()=>{}); }, 30000);
   window.addEventListener('ob:account',()=>{
     if(!C.user&&['moving','paused','falling','requesting'].includes(phase)){phase='over';moving=null;gameId=null;}
     updateAccount();

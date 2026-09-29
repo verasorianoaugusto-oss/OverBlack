@@ -54,3 +54,12 @@ Mejorar solo el fondo móvil de STACK: ambiente urbano oscuro, textura de concre
 - Pedidos ADMIN incorpora formulario de código/referencia de envío mediante la operación existente `ob_tracking` y su notificación automática.
 - Seguridad: aviso pg_net instalado en public; extensión no reubicable. No eliminar/reinstalar durante operación del correo; evaluar en cierre sin perder peticiones pendientes. Tablas privadas sin políticas RLS son intencionalmente inaccesibles directamente.
 - Las 17 pruebas anteriores corresponden al estado previo a recuperación/SEO/envío. No se han vuelto a ejecutar, siguiendo la instrucción de dejarlas al final.
+
+## Publicación — 29 septiembre
+Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de GitHub Pages en e930c74: el cliente público ahora se sirve como vendor-supabase.js; las exclusiones se limitan a directorios. Las migraciones y el procesador ya estaban aplicados en Supabase. Los archivos fuente database/, tests/, supabase/ e internal/ permanecen conservados localmente; todavía no se subieron al repositorio por restricciones del conector. La vista de correo antigua queda excluida de la web pública.
+
+## Avance incremental — 29 septiembre, lista de 200 puntos
+- Supabase: historial con saldo anterior/cambio/saldo final; ficha ADMIN con intentos; registro de final de partida y eliminación del límite de 300 cajas. Migración aplicada sin tablas duplicadas.
+- Interfaz: actualización compartida del saldo, protección contra respuestas antiguas, historial paginado y Mis descuentos con recompensas utilizadas/devueltas por pedido.
+- Verificación técnica mínima de JavaScript correcta. Las 21 pruebas de base de datos previas corresponden al bloque anterior; pruebas completas y recorrido de compra reservados para el final por indicación del propietario.
+- Acceso al navegador restablecido; publicación de este bloque en curso. No equivale a completar toda la lista.
