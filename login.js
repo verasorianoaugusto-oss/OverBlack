@@ -6,7 +6,7 @@
   const client = configured ? window.OBCreateClient(cfg.supabaseUrl, cfg.publishableKey) : null;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = n => 'S/ ' + (n / 100).toFixed(2);
-  let user = null, account = null;
+  let user = null, account = null, accountRevision = 0;
   let authReady;
   const ready = new Promise(r => authReady = r);
   const dialog = document.createElement('dialog');
@@ -48,7 +48,9 @@
     if(account?.avatar_path){const {data,error}=await client.storage.from('avatars').createSignedUrl(account.avatar_path,3600);if(!error&&version===avatarVersion)img.src=data.signedUrl;}
   }
   function acceptAccount(value) {
+    accountRevision++;
     account=value;
+    renderAccountStats();
     renderAvatar();
     window.dispatchEvent(new CustomEvent('ob:account',{detail:account}));
   }
@@ -57,7 +59,12 @@
     async requireUser(){await ready;if(!user){auth();return false;}return true;}
   };
   async function refresh() {
-    account = user ? await rpc('ob_account') : null;
+    const revision=++accountRevision;
+    const uid=user?.id;
+    const value=uid?await rpc('ob_account'):null;
+    if(user?.id!==uid||revision!==accountRevision)return account;
+    account=value;
+    renderAccountStats();
     renderAvatar();
     window.dispatchEvent(new CustomEvent('ob:account',{detail:account}));
     return account;
@@ -141,19 +148,49 @@
     await ready;
     if(!user){auth();return;}
     await refresh();
-    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p><strong>'+account.points.toLocaleString('es-PE')+' puntos</strong> · Récord: '+account.best+' cajas · '+account.best_score+' puntos</p><p>Intentos de hoy: '+account.used+' usados · '+Math.max(0,(account.daily_limit||5)-account.used)+' disponibles</p><p>Recompensas: '+(account.rewards||[[2500,5],[5000,10],[10000,15]]).map(r=>r[0]+' = '+r[1]+'%').join(' · ')+'</p><progress max="'+((account.rewards||[[2500,5],[5000,10],[10000,15]]).find(r=>r[0]>account.points)||account.rewards?.at(-1)||[10000])[0]+'" value="'+account.points+'" aria-label="Progreso de recompensas"></progress><div class="ob-actions"><button id="ob-profile">Datos y foto de perfil</button><button id="ob-my-orders">Mis pedidos</button><button id="ob-my-points">Historial de puntos</button><a href="index.html#stack">Jugar STACK</a></div>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
+    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><div id="ob-account-stats"></div><div class="ob-actions"><button id="ob-profile">Datos y foto de perfil</button><button id="ob-my-orders">Mis pedidos</button><button id="ob-my-points">Historial de puntos</button><a href="index.html#stack">Jugar STACK</a></div>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
+    renderAccountStats();
     document.getElementById('ob-profile').onclick=()=>run(null,()=>window.OBEditProfile({client,user,account,rpc,show,run,status,esc,refresh,openAccount}));
     document.getElementById('ob-my-orders').onclick=()=>run(null,()=>orders(false));
-    document.getElementById('ob-my-points').onclick=()=>run(null,async()=>{
-      const {data,error}=await client.from('ob_points_ledger').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(200);
-      if(error)throw error;
-      const labels={stack:'STACK',reserva_pedido:'Puntos usados en pedido',devolucion_pedido:'Devolución por cancelación'};
-      show('<h2>Historial de puntos</h2>'+(!data.length?'<p>Aún no tienes movimientos.</p>':'')+data.map(p=>'<div class="ob-row"><span>'+esc(labels[p.reason]||p.reason)+'<br><small>'+esc(new Date(p.created_at).toLocaleString('es-PE'))+'</small></span><b>'+(p.delta>0?'+':'')+p.delta+' pts</b></div>').join('')+'<button id="ob-points-back">Volver a Mi Cuenta</button>');
-      document.getElementById('ob-points-back').onclick=()=>run(null,openAccount);
-    });
+    document.getElementById('ob-my-points').onclick=()=>run(null,()=>pointsHistory());
+    const rewardsButton=document.createElement('button');rewardsButton.textContent='Mis descuentos';rewardsButton.onclick=()=>run(rewardsButton,()=>rewardsHistory());document.getElementById('ob-my-points').after(rewardsButton);
     document.getElementById('ob-admin')?.addEventListener('click',()=>run(null,admin));
     document.getElementById('ob-signout').onclick=e=>run(e.target,async()=>{const {error}=await client.auth.signOut();if(error)throw error;user=null;account=null;auth();});
   }
+
+  function renderAccountStats(){
+    const root=document.getElementById('ob-account-stats');if(!root||!account)return;
+    const rewards=account.rewards||[[2500,5],[5000,10],[10000,15]];
+    const target=(rewards.find(r=>r[0]>account.points)||rewards.at(-1))[0];
+    root.innerHTML='<p><strong>'+account.points.toLocaleString('es-PE')+' puntos</strong> · Récord: '+account.best+' cajas · '+account.best_score+' puntos</p><p>Intentos de hoy: '+account.used+' usados · '+Math.max(0,(account.daily_limit||5)-account.used)+' disponibles</p><p>Se renuevan a las 00:00 de Perú.</p>'+rewards.map(([pts,pct])=>'<p>'+pts.toLocaleString('es-PE')+' puntos = '+pct+'% · '+(account.points>=pts?'Disponible al comprar':'Te faltan '+(pts-account.points).toLocaleString('es-PE')+' puntos')+'</p>').join('')+'<progress max="'+target+'" value="'+Math.min(target,account.points)+'" aria-label="Progreso de recompensas"></progress>';
+  }
+  async function rewardsHistory(page=0){
+    const uid=user?.id;if(!uid)return auth();
+    await refresh();
+    const {data,error}=await client.from('ob_orders').select('id,created_at,status,points_spent,discount').eq('user_id',uid).gt('points_spent',0).order('id',{ascending:false}).range(page*50,page*50+50);
+    if(error)throw error;if(user?.id!==uid)return;
+    show('<h2>Mis descuentos</h2><div id="ob-account-stats"></div><p>Elige tu recompensa al revisar la compra. Los puntos se descuentan solo cuando se confirma el pedido. Puedes utilizar una recompensa por pedido.</p><a href="index.html#productos">Ver productos</a><h3>Recompensas utilizadas</h3>'+(!data.length?'<p>Todavía no has utilizado puntos en un pedido.</p>':'')+data.slice(0,50).map(o=>'<div class="ob-row"><div><b>#OB-'+String(o.id).padStart(5,'0')+'</b><p>'+esc(new Date(o.created_at).toLocaleString('es-PE',{timeZone:'America/Lima'}))+' · Perú<br>'+o.points_spent+' puntos · Descuento '+money(o.discount)+'<br>'+(o.status==='cancelado'?'Pedido cancelado · puntos devueltos':'Recompensa aplicada a este pedido')+'</p></div></div>').join('')+'<div class="ob-actions"><button id="ob-rewards-prev" '+(!page?'disabled':'')+'>Anterior</button><span>Página '+(page+1)+'</span><button id="ob-rewards-next" '+(data.length<=50?'disabled':'')+'>Siguiente</button></div><button id="ob-rewards-back">Volver a Mi Cuenta</button>');
+    renderAccountStats();
+    document.getElementById('ob-rewards-prev').onclick=e=>run(e.target,()=>rewardsHistory(page-1));
+    document.getElementById('ob-rewards-next').onclick=e=>run(e.target,()=>rewardsHistory(page+1));
+    document.getElementById('ob-rewards-back').onclick=()=>run(null,openAccount);
+  }
+  async function pointsHistory(page=0){
+    const data=await rpc('ob_points_history',{p_page:page});
+    const labels={stack:'STACK',reserva_pedido:'Puntos usados en pedido',devolucion_pedido:'Devolución por cancelación'};
+    show('<h2>Historial de puntos</h2><p>Saldo actual: '+data.balance+' puntos</p>'+(!data.movements.length?'<p>Aún no tienes movimientos.</p>':'')+data.movements.map(p=>'<div class="ob-row"><span>'+esc(labels[p.reason]||p.reason)+'<br><small>'+esc(new Date(p.created_at).toLocaleString('es-PE',{timeZone:'America/Lima'}))+' · Perú</small><br>Saldo anterior: '+p.balance_before+' · Saldo final: '+p.balance_after+'</span><b>'+(p.delta>0?'+':'')+p.delta+' pts</b></div>').join('')+'<div class="ob-actions"><button id="ob-points-prev" '+(!page?'disabled':'')+'>Anterior</button><span>Página '+(page+1)+'</span><button id="ob-points-next" '+((page+1)*50>=data.total?'disabled':'')+'>Siguiente</button></div><button id="ob-points-back">Volver a Mi Cuenta</button>');
+    document.getElementById('ob-points-prev').onclick=e=>run(e.target,()=>pointsHistory(page-1));
+    document.getElementById('ob-points-next').onclick=e=>run(e.target,()=>pointsHistory(page+1));
+    document.getElementById('ob-points-back').onclick=()=>run(null,openAccount);
+  }
+  let accountRefreshing=false;
+  async function refreshVisibleAccount(){
+    if(document.hidden||!user||accountRefreshing)return;
+    accountRefreshing=true;try{await refresh();}catch{}finally{accountRefreshing=false;}
+  }
+  setInterval(refreshVisibleAccount,15000);
+  document.addEventListener('visibilitychange',refreshVisibleAccount);
+  window.addEventListener('focus',refreshVisibleAccount);
 
   (async()=>{
     let recovery=false;
