@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /database/
+Disallow: /tests/
+Disallow: /supabase/
+
+Sitemap: https://overblack.store/sitemap.xml

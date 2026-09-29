@@ -29,7 +29,7 @@
   padding:30px 32px 24px;
   border:1px solid #594044;border-top:3px solid #e52e3c;border-radius:3px;
   background-color:#09090b;
-  background-image:linear-gradient(180deg,#08080b66 0%,#08080b99 28%,#08080bd9 49%,#08080bed 100%),url("login-city.png");
+  background-image:linear-gradient(180deg,#08080b66 0%,#08080b99 28%,#08080bd9 49%,#08080bed 100%),url("login-city.webp");
   background-size:cover;
   background-position:center,center 34%;
   background-repeat:no-repeat;
@@ -67,7 +67,7 @@
 
 .ob-account-page{margin:0;background:#080808;color:#eee;font:14px Arial,sans-serif;min-height:100vh}.ob-account-page header{display:flex;justify-content:space-between;padding:24px;border-bottom:1px solid #333}.ob-account-page a{color:#eee;text-decoration:none}.ob-account-page main{max-width:900px;margin:32px auto;padding:0 20px}.ob-account-page h1{font-size:26px;letter-spacing:2px}.ob-account-page .ob-commerce-dialog{position:relative;box-sizing:border-box;max-height:none;width:min(760px,calc(100% - 32px));margin:24px auto 60px}.ob-account-page .ob-commerce-dialog button{margin:4px}.ob-account-page .ob-commerce-dialog input{box-sizing:border-box}.ob-availability{font-size:12px;color:#aaa;margin:0 0 12px}
 /* Account page: supplied street photo and left navigation. */
-.ob-account-page{background:#090909 url("account-street.png") center 58%/cover fixed no-repeat;isolation:isolate}
+.ob-account-page{background:#090909 url("account-street.webp") center 58%/cover fixed no-repeat;isolation:isolate}
 .ob-account-page:before{content:"";position:fixed;inset:0;background:linear-gradient(90deg,#050505b8,#05050545 55%,#05050570);z-index:-1;pointer-events:none}
 .ob-account-page header{background:#070707bd;backdrop-filter:blur(8px);position:relative;z-index:1}
 .ob-account-page main{max-width:none;margin:38px 5vw 20px 310px;padding:0}
@@ -76,3 +76,14 @@
 .ob-account-sidebar p{font-size:10px;letter-spacing:2px;color:#aaa;margin:0 0 16px}.ob-account-sidebar button,.ob-account-sidebar a{display:block;box-sizing:border-box;width:100%;text-align:left;padding:14px 12px;font:600 13px Arial;color:#eee;background:#151515cc;border:1px solid #ffffff24;border-radius:4px;text-decoration:none;cursor:pointer}.ob-account-sidebar button:hover,.ob-account-sidebar a:hover{border-color:#ff6871;background:#282020}.ob-account-sidebar .ob-actions{display:flex;flex-direction:column;gap:12px;margin:0}.ob-account-sidebar button:disabled{opacity:.5}.ob-account-sidebar #ob-signout{color:#ff9399}
 @media(max-width:720px){.ob-account-page header{padding:20px 16px}.ob-account-page main{margin:26px 20px 18px}.ob-account-sidebar{position:relative;top:auto;left:auto;width:calc(100% - 32px);margin:0 16px 20px;order:2}.ob-account-page{display:flex;flex-direction:column;background-position:center}.ob-account-page main{order:1}.ob-account-page .ob-commerce-dialog{order:3;width:calc(100% - 32px);max-width:none;margin:0 16px 32px;padding:22px;min-height:0}.ob-account-sidebar p{margin-bottom:6px}}
 .ob-confirmation{text-align:center;max-width:620px;margin:0 auto;padding:12px 0}.ob-confirm-icon{font-size:48px;color:#ff7c86}.ob-confirm-label{font-size:11px!important;letter-spacing:2px;color:#ffadb4!important}.ob-confirmation h2{font-size:clamp(28px,5vw,40px);margin:16px 0;color:#fff}.ob-confirmation p{font-size:16px;line-height:1.65}.ob-confirm-email{display:block;font-size:clamp(17px,3vw,24px);color:#fff;overflow-wrap:anywhere;margin:16px 0 24px}.ob-confirm-wait{padding:16px;border:1px solid #ff7c86;background:#39151c;color:#ffdae0;font-size:17px;font-weight:700;border-radius:6px}.ob-confirmation ol{text-align:left;line-height:1.8;padding-left:24px;margin:26px 0;color:#eee;font-size:16px}.ob-confirm-help{background:#ffffff0b;border-radius:6px;padding:16px;color:#ddd!important}.ob-confirmation .ob-submit{width:100%;justify-content:center;margin:22px 0 14px!important}.ob-confirmation .ob-secondary{display:block;margin:12px auto!important;font-size:14px}.ob-confirm-shop{display:inline-block;margin-top:18px;color:#ddd;font-size:14px}.ob-confirmation h2:focus{outline:none}
+
+.ob-avatar{width:34px;height:34px;border-radius:50%;object-fit:cover;vertical-align:middle;border:2px solid #ed263a;background:#000}.ob-commerce-dialog progress{width:100%;accent-color:#ed263a}.ob-row button{margin:4px}
+
+.ob-commerce-dialog textarea{width:100%;min-height:80px;box-sizing:border-box;padding:10px;background:#111;color:#eee;border:1px solid #555;font:inherit}.product select{margin:8px 0;width:100%;padding:8px;background:#141414;color:#eee;border:1px solid #555}.product button.buy{width:100%;cursor:pointer}
+.ob-store-notice{padding:12px 4%;background:#171111;border-bottom:1px solid #672222;color:#eee;font-size:14px;text-align:center;white-space:pre-wrap;overflow-wrap:anywhere}
+.ob-store-notice[hidden]{display:none}
+.ob-info-links{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+.ob-info-links button{background:none;border:0;color:inherit;text-decoration:underline;cursor:pointer;font:inherit;min-height:44px}
+.ob-policy-text{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.7}
+#ob-settings-form fieldset{border:1px solid #333;padding:16px;margin:20px 0;min-width:0}
+#ob-settings-form legend{padding:0 8px;font-weight:700}

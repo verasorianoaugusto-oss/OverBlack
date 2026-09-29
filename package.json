@@ -1,0 +1,11 @@
+{
+  "name": "overblack",
+  "private": true,
+  "version": "1.1.0",
+  "scripts": {
+    "test": "node --test --test-isolation=none tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.3.10"
+  }
+}

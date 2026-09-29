@@ -1,0 +1,10 @@
+exclude:
+  - database
+  - supabase
+  - tests
+  - internal
+  - WORK-PLAN.md
+  - package.json
+  - pnpm-lock.yaml
+  - node_modules
+  - email-preview.html

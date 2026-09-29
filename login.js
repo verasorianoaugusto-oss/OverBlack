@@ -6,7 +6,7 @@
   const client = configured ? window.OBCreateClient(cfg.supabaseUrl, cfg.publishableKey) : null;
   const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const money = n => 'S/ ' + (n / 100).toFixed(2);
-  let user = null, account = null, catalog = [], variants = [], shipping = [], basket = [], pendingOrder = null;
+  let user = null, account = null;
   let authReady;
   const ready = new Promise(r => authReady = r);
   const dialog = document.createElement('dialog');
@@ -35,19 +35,36 @@
     }
     window.dispatchEvent(new Event('ob:dialog'));
   }
-  function status(message) { const el=dialog.querySelector('.ob-status'); if(el) el.textContent=message; }
+  function status(message) { if(!dialog.open)show('<h2>OVERBLACK</h2>');const el=dialog.querySelector('.ob-status'); if(el) el.textContent=message; }
   async function run(button, fn) { if(button)button.disabled=true;try {await fn();}catch(e){status(e.message || 'No se pudo completar. Vuelve a intentarlo.');}finally {if(button)button.disabled=false;} }
   function needClient() { if(!client) throw Error('Estamos preparando las cuentas de OVERBLACK. Podrás registrarte cuando se active la tienda.'); return client; }
   async function rpc(name,args={}) { const {data,error}=await needClient().rpc(name,args);if(error)throw error;return data; }
   async function select(table, columns='*') {const {data,error}=await needClient().from(table).select(columns);if(error)throw error;return data;}
+  let avatarVersion=0;
+  async function renderAvatar(){
+    const version=++avatarVersion;
+    const img=document.createElement('img');img.alt='';img.className='ob-avatar';img.src='avatar-ob.svg';
+    trigger.replaceChildren(img,document.createTextNode(' MI CUENTA'));
+    if(account?.avatar_path){const {data,error}=await client.storage.from('avatars').createSignedUrl(account.avatar_path,3600);if(!error&&version===avatarVersion)img.src=data.signedUrl;}
+  }
+  function acceptAccount(value) {
+    account=value;
+    renderAvatar();
+    window.dispatchEvent(new CustomEvent('ob:account',{detail:account}));
+  }
+  window.OBCommerce={ready,rpc,refresh,acceptAccount,openAccount,client,select,show,run,esc,
+    get user(){return user;},get account(){return account;},
+    async requireUser(){await ready;if(!user){auth();return false;}return true;}
+  };
   async function refresh() {
     account = user ? await rpc('ob_account') : null;
-    trigger.textContent = 'MI CUENTA';
+    renderAvatar();
     window.dispatchEvent(new CustomEvent('ob:account',{detail:account}));
     return account;
   }
   const trigger=document.createElement('button');trigger.className='ob-account-trigger';trigger.textContent='MI CUENTA';trigger.onclick=()=>run(null,openAccount);
   document.querySelector('.nav .cart')?.before(trigger);
+  if(accountPage)document.querySelector('header')?.append(trigger);
   function auth(mode='login') {
     const signup=mode==='signup',recover=mode==='recover',reset=mode==='reset';
     show('<div class="ob-auth-edition" aria-hidden="true"><span>OB / STREET DEPT.</span><span>EST. PERÚ</span></div><div class="ob-auth-brand"><img src="logo-overblack.svg" alt="" width="58" height="48"><span>OVER<span class="ob-auth-word">BLACK</span></span></div><div class="ob-auth-stamp" aria-hidden="true">TU ESTILO. TUS REGLAS.</div><h2 class="ob-auth-title">'+(signup?'Crear cuenta':recover?'Recuperar contraseña':reset?'Nueva contraseña':'Iniciar sesión')+'</h2><p class="ob-auth-caption">ÚNETE A LA COMUNIDAD</p><form id="ob-auth-form">'+
@@ -97,26 +114,26 @@
     if(accountPage)dialog.scrollIntoView({block:'start'});
   }
 
-  async function loadAdminCatalog(){[catalog,variants,shipping]=await Promise.all([select('ob_products'),select('ob_variants'),select('ob_shipping')]);}
-  const statusLabels={nuevo:'Nuevo',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
+  const statusLabels={pendiente_adelanto:'Pendiente de adelanto',adelanto_confirmado:'Adelanto confirmado',nuevo:'Nuevo',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
   async function orders(isAdmin) {
-    await refresh();if(!account?.admin)throw Error('Acceso denegado.');
+    await refresh();if(!user||(isAdmin&&!account?.admin))throw Error('Acceso denegado.');
     let query=client.from('ob_orders').select('*,ob_order_items(*)').order('created_at',{ascending:false}).limit(100);
     if(!isAdmin)query=query.eq('user_id',user.id);
     const {data,error}=await query;if(error)throw error;
-    show('<h2>'+ (isAdmin?'OVERBLACK ADMIN · Pedidos':'Mis pedidos')+'</h2>'+(!data.length?'<p>No hay pedidos.</p>':'')+data.map(o=>'<div class="ob-row"><div><b>#OB-'+String(o.id).padStart(5,'0')+' · '+esc(statusLabels[o.status])+'</b><p>'+o.ob_order_items.map(i=>esc(i.name)+' / '+esc(i.size)+' × '+i.quantity).join('<br>')+'</p><p>'+money(o.total)+' · '+(o.status==='entregado'?'Pagado':o.status==='cancelado'?'Cancelado':'Contra entrega — por cobrar')+'<br>'+esc(o.delivery.recipient)+' · '+esc(o.delivery.phone)+'<br>'+esc(o.delivery.address)+' · '+esc(o.delivery.district)+'<br>'+esc(o.delivery.reference)+'</p>'+(isAdmin&&!['entregado','cancelado'].includes(o.status)?'<div class="ob-actions">'+({nuevo:['preparando','cancelado'],preparando:['enviado','cancelado'],enviado:['entregado','cancelado']}[o.status]||[]).map(s=>'<button data-order="'+o.id+'" data-status="'+s+'">'+statusLabels[s]+'</button>').join('')+'</div>':'')+'</div></div>').join(''),true);
+    show('<h2>'+ (isAdmin?'OVERBLACK ADMIN · Pedidos':'Mis pedidos')+'</h2>'+(!data.length?'<p>No hay pedidos.</p>':'')+data.map(o=>'<div class="ob-row"><div><b>#OB-'+String(o.id).padStart(5,'0')+' · '+esc(statusLabels[o.status])+'</b><p>'+o.ob_order_items.map(i=>esc(i.name)+' / '+esc(i.size)+' × '+i.quantity).join('<br>')+'</p><p>'+money(o.total)+' · Descuento: '+money(o.discount)+' · Puntos usados: '+o.points_spent+' · '+(o.status==='entregado'?'Pagado':o.status==='cancelado'?'Cancelado':o.payment_method==='shalom_adelanto'?'Shalom · Adelanto '+money(o.advance_due):'Contra entrega — por cobrar')+'<br>'+esc(o.delivery.recipient)+' · '+esc(o.delivery.phone)+'<br>'+esc(o.delivery.address||o.delivery.destination)+' · '+esc(o.delivery.district||o.delivery.agency)+'<br>'+esc(o.delivery.reference)+(o.tracking?'<br>Envío: '+esc(o.tracking):'')+'</p>'+(isAdmin&&['preparando','enviado'].includes(o.status)?'<form data-tracking-form="'+o.id+'"><label>Código o referencia de envío<input name="tracking" required maxlength="100" value="'+esc(o.tracking||'')+'"></label><button>Guardar envío</button></form>':'')+(isAdmin&&!['entregado','cancelado'].includes(o.status)?'<div class="ob-actions">'+({pendiente_adelanto:['adelanto_confirmado','cancelado'],adelanto_confirmado:['preparando','cancelado'],nuevo:['preparando','cancelado'],preparando:['enviado','cancelado'],enviado:['entregado','cancelado']}[o.status]||[]).map(s=>'<button data-order="'+o.id+'" data-status="'+s+'">'+statusLabels[s]+'</button>').join('')+'</div>':'')+'</div></div>').join(''),true);
+    dialog.querySelectorAll('[data-tracking-form]').forEach(form=>form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{await rpc('ob_tracking',{p_order:Number(form.dataset.trackingForm),p_tracking:new FormData(form).get('tracking')});await orders(true);status('Información de envío guardada.');});});
     dialog.querySelectorAll('[data-order]').forEach(b=>b.onclick=()=>run(b,async()=>{if(b.dataset.status==='cancelado'&&!confirm('¿Cancelar este pedido y devolver stock y puntos?'))return;if(b.dataset.status==='entregado'&&!confirm('¿Confirmas que el pedido fue entregado y cobrado?'))return;await rpc('ob_order_status',{p_order:Number(b.dataset.order),p_status:b.dataset.status});await orders(true);}));
   }
   async function admin() {
     await refresh();if(!account?.admin)throw Error('Acceso denegado.');
-    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>OVERBLACK ADMIN</p><div class="ob-actions"><button id="ob-admin-orders">Pedidos</button><button id="ob-admin-stock">Productos / stock</button><button id="ob-admin-shipping">Envíos</button><button id="ob-admin-customers">Clientes / puntos</button></div><p>Recompensas: 2,500 = 5%, 5,000 = 10%, 10,000 = 15%. Una por pedido, elegida por el cliente.</p>');
+    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>OVERBLACK ADMIN</p><div class="ob-actions"><button id="ob-admin-orders">Pedidos</button><button id="ob-admin-stock">Productos / stock</button><button id="ob-admin-shipping">Centro de configuración</button><button id="ob-admin-customers">Clientes / puntos</button>'+(account.super_admin?'<button id="ob-admin-security">Seguridad y administradores</button>':'')+'</div><div class="ob-actions">'+['dashboard','coupons','errors','audit','manual','recovery'].map((k,i)=>'<button data-center="'+k+'">'+['Dashboard','Cupones','Centro de errores','Auditoría','Manual privado','Papelera / recuperación'][i]+'</button>').join('')+'</div><p>Recompensas: '+(account.rewards||[[2500,5],[5000,10],[10000,15]]).map(r=>r[0]+' = '+r[1]+'%').join(' · ')+'. Una por pedido, elegida por el cliente.</p>');
+    document.getElementById('ob-admin-security')?.addEventListener('click',()=>run(null,()=>window.OBAdminSecurity({client,rpc,show,run,status,esc,refresh})));
     document.getElementById('ob-admin-orders').onclick=()=>run(null,()=>orders(true));
-    document.getElementById('ob-admin-customers').onclick=()=>run(null,async()=>{const rows=await select('ob_profiles');show('<h2>Clientes / puntos</h2>'+rows.map(p=>'<div class="ob-row"><span>'+esc(p.username||p.id)+'<br><small>Récord: '+p.best+' cajas</small></span><b>'+p.points+' pts</b></div>').join(''),true);});
+    document.getElementById('ob-admin-customers').onclick=()=>run(null,()=>window.OBAdminCustomers({rpc,show,run,esc}));
     document.getElementById('ob-admin-stock').onclick=()=>run(null,()=>window.OBEditProducts({client,select,rpc,show,run,status,esc}));
-    document.getElementById('ob-admin-shipping').onclick=()=>{
-      show('<h2>Zonas y tarifas de envío</h2><form id="ob-shipping-form">'+['department','province','district'].map((name,i)=>'<label>'+['Departamento','Provincia','Distrito'][i]+'<input name="'+name+'" required maxlength="80"></label>').join('')+'<label>Tarifa S/<input name="fee" type="number" min="0" step="0.01" required></label><label class="ob-check"><input name="active" type="checkbox" checked> Zona activa</label><button class="ob-submit">Guardar zona</button></form>');
-      document.getElementById('ob-shipping-form').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(e.target);await rpc('ob_shipping_save',{p_department:f.get('department'),p_province:f.get('province'),p_district:f.get('district'),p_fee:Math.round(Number(f.get('fee'))*100),p_active:f.has('active')});await loadAdminCatalog();status('Zona guardada.');});};
-    };
+    const center=section=>window.OBAdminCenter(section,{client,rpc,select,show,run,status,esc});
+    document.querySelectorAll('[data-center]').forEach(b=>b.onclick=()=>run(b,()=>center(b.dataset.center)));
+    document.getElementById('ob-admin-shipping').onclick=()=>run(null,()=>center('settings'));
   }
 
   async function openAccount(){
@@ -124,31 +141,28 @@
     await ready;
     if(!user){auth();return;}
     await refresh();
-    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p>Estamos preparando los pedidos y beneficios de tu cuenta.</p>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
+    show('<h2>Bienvenido, '+esc(account.username||'OVERBLACK')+'</h2><p>'+esc(user.email)+'</p><p><strong>'+account.points.toLocaleString('es-PE')+' puntos</strong> · Récord: '+account.best+' cajas · '+account.best_score+' puntos</p><p>Intentos de hoy: '+account.used+' usados · '+Math.max(0,(account.daily_limit||5)-account.used)+' disponibles</p><p>Recompensas: '+(account.rewards||[[2500,5],[5000,10],[10000,15]]).map(r=>r[0]+' = '+r[1]+'%').join(' · ')+'</p><progress max="'+((account.rewards||[[2500,5],[5000,10],[10000,15]]).find(r=>r[0]>account.points)||account.rewards?.at(-1)||[10000])[0]+'" value="'+account.points+'" aria-label="Progreso de recompensas"></progress><div class="ob-actions"><button id="ob-profile">Datos y foto de perfil</button><button id="ob-my-orders">Mis pedidos</button><button id="ob-my-points">Historial de puntos</button><a href="index.html#stack">Jugar STACK</a></div>'+(account.admin?'<button id="ob-admin">PANEL ADMIN</button>':'')+'<button id="ob-signout">Cerrar sesión</button>');
+    document.getElementById('ob-profile').onclick=()=>run(null,()=>window.OBEditProfile({client,user,account,rpc,show,run,status,esc,refresh,openAccount}));
+    document.getElementById('ob-my-orders').onclick=()=>run(null,()=>orders(false));
+    document.getElementById('ob-my-points').onclick=()=>run(null,async()=>{
+      const {data,error}=await client.from('ob_points_ledger').select('*').eq('user_id',user.id).order('created_at',{ascending:false}).limit(200);
+      if(error)throw error;
+      const labels={stack:'STACK',reserva_pedido:'Puntos usados en pedido',devolucion_pedido:'Devolución por cancelación'};
+      show('<h2>Historial de puntos</h2>'+(!data.length?'<p>Aún no tienes movimientos.</p>':'')+data.map(p=>'<div class="ob-row"><span>'+esc(labels[p.reason]||p.reason)+'<br><small>'+esc(new Date(p.created_at).toLocaleString('es-PE'))+'</small></span><b>'+(p.delta>0?'+':'')+p.delta+' pts</b></div>').join('')+'<button id="ob-points-back">Volver a Mi Cuenta</button>');
+      document.getElementById('ob-points-back').onclick=()=>run(null,openAccount);
+    });
     document.getElementById('ob-admin')?.addEventListener('click',()=>run(null,admin));
     document.getElementById('ob-signout').onclick=e=>run(e.target,async()=>{const {error}=await client.auth.signOut();if(error)throw error;user=null;account=null;auth();});
   }
 
-  async function syncProductCards(){
-    const [rows,sizes]=await Promise.all([select('ob_products'),select('ob_variants')]);
-    const update=()=>document.querySelectorAll('#grid .product').forEach(card=>{
-      const p=rows.find(p=>p.name===card.querySelector('h3')?.textContent);if(!p)return;
-      card.hidden=!!p.archived;if(p.archived)return;
-      if(p.image_path){const photo=card.querySelector('.photo');photo.innerHTML='';const img=document.createElement('img');img.alt=p.name;img.src=client.storage.from('product-images').getPublicUrl(p.image_path).data.publicUrl;img.style.cssText='width:100%;height:100%;object-fit:contain';photo.append(img);}
-      if(p.price){card.querySelector('.price').textContent=money(p.price);let label=card.querySelector('.ob-availability');if(!label){label=document.createElement('p');label.className='ob-availability';card.querySelector('.price').after(label);}const vs=sizes.filter(v=>v.product_id===p.id&&v.stock>0);label.textContent=p.active&&vs.length?'En stock · Tallas: '+vs.map(v=>v.size).join(', '):'Sin stock';}
-    });
-    update();const grid=document.getElementById('grid');if(grid)new MutationObserver(update).observe(grid,{childList:true});
-  }
-
-  let dismissed=false;
-  try{dismissed=sessionStorage.getItem('ob.login.dismissed')==='1';}catch{}
-  dialog.addEventListener('close',()=>{try{sessionStorage.setItem('ob.login.dismissed','1');}catch{}});
   (async()=>{
     let recovery=false;
     try{
       if(client){
         client.auth.onAuthStateChange((event,session)=>{
           user=session?.user||null;
+          if(event==='SIGNED_OUT')acceptAccount(null);
+          else if(event!=='INITIAL_SESSION')setTimeout(()=>refresh().catch(()=>{}),0);
           if(event==='PASSWORD_RECOVERY'){recovery=true;setTimeout(()=>auth('reset'),0);}
         });
         const {data,error}=await client.auth.getSession();if(error)throw error;
@@ -156,7 +170,7 @@
       }
     }catch{user=null;}
     finally{authReady();}
-    if(accountPage&&!recovery)run(null,openAccount);else if(!user&&!dismissed&&!recovery)auth();
-    if(!accountPage&&client)syncProductCards().catch(()=>{});
+    if(accountPage&&!recovery)run(null,openAccount);else if(!accountPage&&!recovery)refresh().catch(()=>{});
+
   })();
 })();

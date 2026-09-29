@@ -1,6 +1,6 @@
 /* Decorative side walls stay behind the storefront and never intercept input. */
 body{isolation:isolate}
-body:before,body:after{content:'';position:fixed;top:0;bottom:0;width:max(5vw,calc((100vw - 1120px)/2));z-index:-1;pointer-events:none;background-image:linear-gradient(#08080840,#08080840),url('urban-graffiti.png');background-size:cover;background-position:center;opacity:.7}
+body:before,body:after{content:'';position:fixed;top:0;bottom:0;width:max(5vw,calc((100vw - 1120px)/2));z-index:-1;pointer-events:none;background-image:linear-gradient(#08080840,#08080840),url('urban-graffiti.webp');background-size:cover;background-position:center;opacity:.7}
 body:before{left:0;mask-image:linear-gradient(to right,#000 35%,transparent)}
 body:after{right:0;background-position:65% center;mask-image:linear-gradient(to left,#000 35%,transparent)}
 @media(max-width:700px){body:before,body:after{width:16vw;opacity:.3}}

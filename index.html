@@ -63,19 +63,30 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 .about-story{max-width:800px}.banner .about-story p{max-width:none;margin-bottom:20px;color:#bfc3bd;line-height:1.9}.about-story strong{color:#f0f2eb}.banner .about-lead{font-size:clamp(20px,2.5vw,28px);line-height:1.5;margin-top:20px}.about-motto{padding-top:12px;border-top:1px solid #ffffff20}.about-signature strong{color:var(--accent);font-size:13px;letter-spacing:1px}.navlinks{gap:18px}@media(max-width:850px){.nav{height:auto;min-height:76px;flex-wrap:wrap;padding:12px 0;gap:10px}.navlinks{display:flex;order:3;width:100%;justify-content:space-between;gap:8px;font-size:12px;padding:8px 0 3px}html{scroll-padding-top:130px}}@media(max-width:520px){.navlinks{font-size:11px}.banner .about-story p{font-size:14px}.banner .about-lead{font-size:20px}}
 .contact-section{border-top:1px solid #62edff33;background:radial-gradient(ellipse at 90% 40%,#62edff0c,transparent 65%)}.contact-panel{padding:32px;border:1px solid #354740;border-left:3px solid var(--cyan);background:#111713}.contact-panel h3{font-size:24px;margin-bottom:12px}.contact-panel p{max-width:640px;color:#b5bcb7;line-height:1.8;margin-bottom:24px}.contact-panel .social-links .social{border:1px solid #555;padding:12px 16px}.contact-section .section-head:after{content:'SAY HELLO / OB'}@media(max-width:520px){.contact-panel{padding:24px 20px}.contact-panel h3{font-size:21px}.contact-section .section-head:after{content:'HELLO / OB'}}
 </style>
+<link rel="canonical" href="https://overblack.store/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="es_PE">
+<meta property="og:site_name" content="OVERBLACK">
+<meta property="og:title" content="OVERBLACK | Streetwear Perú">
+<meta property="og:description" content="Ropa oversize y zapatillas con esencia urbana. Descubre OVERBLACK y juega STACK.">
+<meta property="og:url" content="https://overblack.store/">
+<meta property="og:image" content="https://overblack.store/look-all-black.jpg">
+<meta property="og:image:alt" content="Outfit urbano negro de OVERBLACK">
+<meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#080808">
 <link rel="icon" type="image/svg+xml" href="logo-overblack.svg">
 
-<link rel="stylesheet" href="stack.css?v=2">
-<script defer src="stack-engine.js?v=1"></script>
-<script defer src="stack-config.js?v=1"></script>
-<script defer src="stack.js?v=2"></script>
-<link rel="stylesheet" href="urban-layout.css?v=1"><script defer src="stack-screen.js?v=1"></script><link rel="stylesheet" href="commerce.css?v=6">
+<link rel="stylesheet" href="stack.css?v=20">
+<script defer src="stack-engine.js?v=20"></script>
+
+
+<link rel="stylesheet" href="urban-layout.css?v=20"><script defer src="stack-screen.js?v=1"></script><link rel="stylesheet" href="commerce.css?v=20">
 <script defer src="supabase-client.js?v=1"></script>
 <script defer src="commerce-config.js?v=1"></script>
-<script defer src="product-editor.js?v=2"></script>
-<script defer src="login.js?v=9"></script>
-</head>
+<script defer src="product-editor.js?v=20"></script>
+<script defer src="admin-customers.js?v=20"></script><script defer src="admin-security.js?v=20"></script><script defer src="profile-editor.js?v=20"></script><script defer src="admin-center.js?v=20"></script><script defer src="login.js?v=20"></script><script defer src="store-content.js?v=20"></script>
+<script defer src="stack.js?v=20"></script><script defer src="shop.js?v=20"></script>
+<link rel="stylesheet" href="stack-mobile.css?v=1"></head>
 <body>
 <header>
 <div class="container nav">
@@ -110,7 +121,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 <button class="filter" onclick="filterProducts('zapatillas',this)">Zapatillas</button>
 <button class="filter" onclick="filterProducts('hoodies',this)">Hoodies</button>
 </div>
-<div class="grid" id="grid"></div>
+<div class="grid" id="grid"><p role="status">Cargando productos…</p></div>
 </div>
 </section>
 
@@ -142,11 +153,11 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
  <span class="ob-wall-tag ob-wall-top" aria-hidden="true">MORE<br>THAN<br>CLOTHES</span>
  <div class="ob-layout">
   <aside class="ob-profile" aria-label="Tus puntos e intentos">
-   <div class="ob-card ob-account"><div class="ob-card-title">TUS PUNTOS <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 4 5 5-8 5 8 4-5-2 13H5Z"/><path d="M5 22h14"/></svg></div><div class="ob-balance"><span id="ob-balance">0</span></div><p class="ob-record">RÉCORD: <span id="ob-best">0</span> CAJAS</p><div class="ob-attempt-section"><div class="ob-card-title">INTENTOS HOY</div><div id="ob-attempt-dots" class="ob-attempts" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><strong class="ob-free-count"><span id="ob-free">5</span> / 5</strong><p class="ob-extra-copy"><span id="ob-extra">0</span> extras · <span id="ob-remaining">5</span> disponibles</p><button class="ob-secondary ob-more" id="ob-more" type="button">⊕ OBTENER MÁS INTENTOS</button></div><p class="ob-reset">5 gratis cada día · 00:00 de Perú</p></div>
+   <div class="ob-card ob-account"><div class="ob-card-title">TUS PUNTOS <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 4 5 5-8 5 8 4-5-2 13H5Z"/><path d="M5 22h14"/></svg></div><div class="ob-balance"><span id="ob-balance">0</span></div><p class="ob-record">RÉCORD: <span id="ob-best">0</span> CAJAS</p><div class="ob-attempt-section"><div class="ob-card-title">INTENTOS HOY</div><div id="ob-attempt-dots" class="ob-attempts" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div><strong class="ob-free-count"><span id="ob-free">5</span> / <span id="ob-daily-limit">5</span></strong><p class="ob-extra-copy"><span id="ob-extra">0</span> extras · <span id="ob-remaining">5</span> disponibles</p><button class="ob-secondary ob-more" id="ob-more" type="button">VER RECOMPENSAS</button></div><p class="ob-reset">5 gratis cada día · 00:00 de Perú</p></div>
    <div class="ob-session"><span>ESTA PARTIDA <b id="ob-score">0</b></span><span>MEJOR PARTIDA <b id="ob-best-score">0</b></span></div>
   </aside>
   <div class="ob-play-column">
-   <div class="ob-heading"><h2 id="ob-title" class="ob-sr-only">OVERBLACK STACK — Apila tu estilo</h2><img class="ob-title-art" src="stack-title.png" alt="OVERBLACK STACK. Apila tu estilo" width="900" height="470" decoding="async"></div>
+   <div class="ob-heading"><h2 id="ob-title" class="ob-sr-only">OVERBLACK STACK — Apila tu estilo</h2><img class="ob-title-art" src="stack-title.webp" alt="OVERBLACK STACK. Apila tu estilo" width="900" height="470" decoding="async"></div>
    <div class="ob-arena">
     <canvas id="ob-canvas" width="600" height="780" tabindex="0" role="button" aria-label="Jugar y soltar caja. También puedes usar Espacio o Enter." aria-describedby="ob-instructions">Tu navegador necesita soporte de canvas para mostrar el juego.</canvas>
     <div class="ob-feedback" aria-live="polite" aria-atomic="true"><strong id="ob-perfect"></strong><span id="ob-points-pop"></span></div>
@@ -159,15 +170,15 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
   <aside class="ob-sidebar" aria-label="Altura, velocidad y recompensas">
    <div class="ob-card ob-live-stats"><div><span>ALTURA</span><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg><strong id="ob-height">0</strong></div><small>CAJAS</small></div><div><span>VELOCIDAD</span><div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 18a9 9 0 1 1 16 0M12 14l5-7"/><circle cx="12" cy="14" r="1"/></svg></div><strong id="ob-speed">×1.00</strong></div></div>
    <div class="ob-card ob-how"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v4H3ZM5 12v10h14V12M12 8v14"/><path d="M12 8C3 8 4 0 8 3l4 5c9 0 8-8 4-5Z"/></svg> CÓMO JUGAR</h3><ol><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M7 7l-5 5 5 5M17 7l5 5-5 5"/></svg><span>La caja se mueve<br>de izquierda a derecha.</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="6"/><path d="M6 10h12M12 2v8"/></svg><span>Haz clic en el momento<br>exacto para soltarla.</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg><span>Si la colocas perfecta<br>ganas <b>+5 puntos.</b></span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 7 9-4 9 4-9 4Z"/><path d="M3 7v10l9 4 9-4V7M12 11v10"/></svg><span>Cada caja aumenta<br>la velocidad.</span></li><li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 10 18H2Z"/><path d="M12 9v5M12 17v1"/></svg><span>Si fallas, se termina<br>la partida.</span></li></ol></div>
-   <div class="ob-card ob-reward"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v4H3ZM5 12v10h14V12M12 8v14"/><path d="M12 8C3 8 4 0 8 3l4 5c9 0 8-8 4-5Z"/></svg> DESCUENTOS CON PUNTOS</h3><div class="ob-reward-goal"><span>5,000 pts</span><span>→</span><strong>10% OFF</strong></div><p class="ob-micro">+ Intentos extra por logros</p><progress id="ob-progress" value="0" max="5000" aria-label="Progreso hacia el 10% de descuento"></progress><div class="ob-progress-copy"><span id="ob-progress-text">0 / 5,000 pts</span><span id="ob-percent">0%</span></div><p class="ob-micro" id="ob-reward-copy">Cada caja te acerca.</p><p class="ob-unlocked" id="ob-unlocked" hidden>OBJETIVO DESBLOQUEADO ↗</p><a class="ob-secondary" id="ob-claim" hidden target="_blank" rel="noopener noreferrer">SOLICITAR MI 10% OFF ↗</a><p class="ob-validation">Canje sujeto a validación de OverBlack.</p></div>
+   <div class="ob-card ob-reward"><h3><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8h18v4H3ZM5 12v10h14V12M12 8v14"/><path d="M12 8C3 8 4 0 8 3l4 5c9 0 8-8 4-5Z"/></svg> DESCUENTOS CON PUNTOS</h3><div class="ob-reward-goal"><span>5,000 pts</span><span>→</span><strong>10% OFF</strong></div><p class="ob-micro">2,500 = 5% · 5,000 = 10% · 10,000 = 15%</p><progress id="ob-progress" value="0" max="5000" aria-label="Progreso hacia la siguiente recompensa"></progress><div class="ob-progress-copy"><span id="ob-progress-text">0 / 5,000 pts</span><span id="ob-percent">0%</span></div><p class="ob-micro" id="ob-reward-copy">Cada caja te acerca.</p><p class="ob-unlocked" id="ob-unlocked" hidden>OBJETIVO DESBLOQUEADO ↗</p><a class="ob-secondary" id="ob-claim" hidden target="_blank" rel="noopener noreferrer">VER MIS PUNTOS ↗</a><p class="ob-validation">Tú eliges si usas tus puntos al comprar.</p></div>
   </aside>
  </div>
  <div class="ob-world-footer"><span>OVERBLACK<br>STREETWEAR<br>FOR A DARKER<br>TOMORROW.</span><p>MÁS QUE ROPA, ES UN JUEGO</p><strong aria-hidden="true">NO<br>LIMITS ↗</strong></div>
 </div>
 <div class="container ob-bottom">
-  <details id="ob-extras"><summary>MÁS INTENTOS / LOGROS, COMPRAS Y PROMOCIONES</summary><div class="ob-details-body ob-extras-grid"><div><p>Gana intentos extra al superar estas alturas. Cada logro se concede una sola vez y tus extras no caducan.</p><div id="ob-achievements"></div></div><div><p>¿Recibiste un código por una compra o promoción de OverBlack? Actívalo aquí.</p><form id="ob-promo-form"><label class="ob-promo-label" for="ob-promo-code">Código de intentos extra</label><div class="ob-code-row"><input id="ob-promo-code" autocomplete="off" spellcheck="false" required maxlength="4096" placeholder="Pega tu código OVERBLACK"><button class="ob-secondary" type="submit">ACTIVAR</button></div></form><p class="ob-promo-status" id="ob-promo-status" role="status"></p><p class="ob-micro">Los códigos los entrega la tienda tras verificar la compra o promoción. <a href="https://wa.me/51981947363?text=Hola%2C%20quiero%20consultar%20los%20intentos%20extra%20de%20OVERBLACK%20STACK." target="_blank" rel="noopener noreferrer" style="text-decoration:underline">Consultar disponibilidad ↗</a></p></div></div></details>
+  <details id="ob-extras"><summary>RECOMPENSAS STACK</summary><div class="ob-details-body ob-extras-grid"><div><p>Tienes cinco partidas diarias. Cada colocación normal suma 2 puntos y cada PERFECT suma 5.</p><div id="ob-achievements"></div></div></div></details>
 
-  <p class="ob-notice" id="ob-storage-note">Primera versión · Tu avance se guarda solo en este navegador. Borrar los datos del navegador elimina el progreso. Los puntos y códigos de esta versión requieren validación de la tienda para premios reales.</p>
+  <p class="ob-notice" id="ob-storage-note">Tus puntos y récord se guardan en tu cuenta. Los intentos se renuevan a las 00:00 de Perú.</p>
   <p class="ob-notice ob-error" id="ob-error" role="status" hidden></p>
   <noscript><p class="ob-notice">Activa JavaScript para jugar OVERBLACK STACK.</p></noscript>
 
@@ -183,63 +194,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 <a class="ob-stack-quicklink" id="ob-quicklink" href="#stack" aria-label="Ir a OVERBLACK STACK">Jugar OVERBLACK STACK ↗</a>
 
 
-<div class="modal" id="modal">
-<div class="modalbox">
-<button class="close" onclick="closeCart()" aria-label="Cerrar carrito">×</button>
-<h2>Tu carrito</h2>
-<div class="cart-items" id="cartItems"></div>
-<div class="total">Total: S/ <span id="total">0.00</span></div>
-<a class="whatsapp" id="order" href="#" target="_blank" rel="noopener noreferrer">Pedir por WhatsApp</a>
-</div>
-</div>
 
-<script>
-const products=[
-{id:1,name:"Polo Oversize Shadow",cat:"polos",price:null},
-{id:2,name:"Polo Oversize Basic",cat:"polos",price:null},
-{id:3,name:"Cargo Urban Black",cat:"pantalones",price:null},
-{id:4,name:"Jogger Street",cat:"pantalones",price:null},
-{id:5,name:"Sneakers Urban X",cat:"zapatillas",price:null},
-{id:6,name:"Sneakers Black Low",cat:"zapatillas",price:null},
-{id:7,name:"Polo Oversize Graphic",cat:"polos",price:null},
-{id:8,name:"Cargo Wide Fit",cat:"pantalones",price:null}
-];
-let cart=[];
-let selectedCollection='todos',selectedCategory='todos';
-const catalogLabels={todos:'Todos',hombres:'Hombres',mujeres:'Mujeres',polos:'Polos',pantalones:'Pantalones',zapatillas:'Zapatillas',hoodies:'Hoodies'};
-
-function render(list=products){
-const grid=document.getElementById("grid");
-if(!list.length){const title=[selectedCollection,selectedCategory].filter(x=>x!=='todos').map(x=>catalogLabels[x]).join(' · ');grid.innerHTML=`<div class="empty catalog-empty" role="status"><span class="eyebrow">PRÓXIMAMENTE</span><h3>${title}</h3><p>Estamos preparando nuevos productos para esta selección.</p><button class="btn" onclick="resetCatalog()">Ver todos los productos</button></div>`;return;}
-grid.innerHTML=list.map(p=>`<article class="product"><div class="photo"><svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 120" fill="none"><path fill="currentColor" fill-rule="evenodd" d="M34 14h40l18 18v56l-18 18H34L16 88V32zm8 18-8 8v40l8 8h24l8-8V40l-8-8z"/><path fill="currentColor" fill-rule="evenodd" d="M84 14h38l22 20v21l-10 9 10 9v15l-20 18H84zm18 18v23h17l7-6V39l-8-7zm0 40v16h17l7-6v-4l-7-6z"/><path d="M6 114 154 6" stroke="#080808" stroke-width="10"/><path d="M6 114 154 6" stroke="currentColor" stroke-width="3"/></svg><span>Foto próximamente</span></div><div class="info"><div class="cat">${p.cat}</div><h3>${p.name}</h3><div class="price coming-soon">Próximamente</div><a class="buy" href="https://wa.me/51981947363?text=${encodeURIComponent("Hola, OverBlack. Quisiera información sobre " + p.name)}" target="_blank" rel="noopener noreferrer">Consultar por WhatsApp ↗</a></div></article>`).join("");
-}
-function filterProducts(cat,el){
-selectedCategory=cat;syncCatalog();
-}
-function selectCollection(collection,el){selectedCollection=collection;syncCatalog();}
-function syncCatalog(){
-document.querySelectorAll('.collection').forEach((x,i)=>{const active=['todos','hombres','mujeres'][i]===selectedCollection;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active));});
-document.querySelectorAll('.filter').forEach((x,i)=>{const active=['todos','polos','pantalones','zapatillas','hoodies'][i]===selectedCategory;x.classList.toggle('active',active);x.setAttribute('aria-pressed',String(active));});
-render(products.filter(p=>(selectedCategory==='todos'||p.cat===selectedCategory)&&(selectedCollection==='todos'||p.collection===selectedCollection||p.collection==='unisex')));
-}
-function resetCatalog(){selectedCollection='todos';selectedCategory='todos';syncCatalog();}
-function add(id){const product=products.find(p=>p.id===id);if(!product||!Number.isFinite(product.price))return;cart.push(product);updateCart();}
-function updateCart(){
-document.getElementById("count").textContent=cart.length;
-const box=document.getElementById("cartItems");
-if(!cart.length){box.innerHTML='<div class="empty">Tu carrito está vacío.</div>';document.getElementById("total").textContent="0.00";document.getElementById("order").removeAttribute("href");document.getElementById("order").setAttribute("aria-disabled","true");return}
-box.innerHTML=cart.map((p,i)=>`<div class="item"><span>${p.name}</span><span>S/ ${p.price.toFixed(2)} <button onclick="removeItem(${i})">✕</button></span></div>`).join("");
-document.getElementById("order").removeAttribute("aria-disabled");
-const total=cart.reduce((a,p)=>a+p.price,0);document.getElementById("total").textContent=total.toFixed(2);
-const text="Hola, OverBlack. Quiero pedir:%0A"+cart.map(p=>"- "+p.name+" (S/ "+p.price.toFixed(2)+")").join("%0A")+"%0A*Total: S/ "+total.toFixed(2)+"*";
-document.getElementById("order").href="https://wa.me/51981947363?text="+text;
-}
-function removeItem(i){cart.splice(i,1);updateCart();}
-function openCart(){document.getElementById("modal").classList.add("show");updateCart()}
-function closeCart(){document.getElementById("modal").classList.remove("show")}
-document.addEventListener("keydown",e=>{if(e.key==="Escape")closeCart()});
-syncCatalog();
-</script>
 <script>
 (()=>{const root=document.getElementById('outfit'),slides=[...root.querySelectorAll('.look-slide')],dots=[...root.querySelectorAll('[data-look]')],reduced=matchMedia('(prefers-reduced-motion: reduce)');let index=0,timer=null,paused=reduced.matches,hover=false;function show(n){index=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.hidden=i!==index);dots.forEach((d,i)=>d.setAttribute('aria-pressed',String(i===index)));document.getElementById('look-count').textContent=String(index+1).padStart(2,'0')+' / 04';}function schedule(){clearInterval(timer);if(!paused&&!hover&&!document.hidden&&!root.contains(document.activeElement))timer=setInterval(()=>show(index+1),5000);}document.getElementById('look-prev').addEventListener('click',()=>{show(index-1);schedule();});document.getElementById('look-next').addEventListener('click',()=>{show(index+1);schedule();});dots.forEach((d,i)=>d.addEventListener('click',()=>{show(i);schedule();}));root.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'){hover=true;schedule();}});root.addEventListener('pointerleave',()=>{hover=false;schedule();});root.addEventListener('focusin',schedule);root.addEventListener('focusout',()=>setTimeout(schedule,0));document.addEventListener('visibilitychange',schedule);reduced.addEventListener('change',e=>{paused=e.matches;schedule();});schedule();})();
 </script></body>
