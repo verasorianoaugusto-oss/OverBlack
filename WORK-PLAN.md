@@ -79,3 +79,9 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Consulta paginada protegida para ADMIN e interfaz Historial de stock preparada.
 - Catálogo distingue tallas agotadas y última unidad.
 - Migración overblack_stock_movements_existing_audit aplicada; comprobación mínima de tres movimientos dentro de transacción revertida correcta. No se alteró stock real. Asesores sin avisos nuevos. Pruebas completas al final.
+
+## Carrito — 29 septiembre
+- Foto, talla, precio unitario, importe y subtotal; opción Vaciar carrito con filtro por propietario en Supabase.
+- Incrementar/descontar/eliminar actualiza la pantalla solo tras guardar correctamente; operaciones de la misma pestaña serializadas y cuenta comprobada antes de mostrar resultado.
+- Cantidades superiores al stock o productos ya no disponibles muestran instrucciones claras; botón + deshabilitado al alcanzar stock/límite.
+- No se cambian descuentos ni validación de checkout. Sintaxis correcta; recorrido con mercancía y compra reservado para pruebas finales.

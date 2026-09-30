@@ -54,25 +54,52 @@
   }).join(''):'<p class="empty">Estamos preparando productos para esta selección.</p>';
   document.querySelectorAll('[data-product-details]').forEach(b=>b.onclick=()=>productDetails(b.dataset.productDetails));
   document.querySelectorAll('[data-add-product]').forEach(b=>b.onclick=()=>run(b,async()=>{
-   await syncUser();const id=document.querySelector('[data-size-for="'+b.dataset.addProduct+'"]').value,v=sizes.find(v=>v.id===id);let item=basket.find(i=>i.variant_id===id);
-   if((item?.quantity||0)>=Math.min(20,v.stock))throw Error('No hay más stock de esta talla.');
-   if(item)item.quantity++;else basket.push({variant_id:id,quantity:1});await saveCart();count();await openCart();
+   const id=document.querySelector('[data-size-for="'+b.dataset.addProduct+'"]').value;
+   await changeCart(id,1);await openCart();
   }));
+ }
+ let cartBusy=false;
+ async function changeCart(id,delta){
+  await syncUser();if(cartBusy)throw Error('Espera a que termine de guardarse el carrito.');
+  const uid=C.user?.id;cartBusy=true;
+  try{
+   const item=basket.find(i=>i.variant_id===id),v=sizes.find(v=>v.id===id),p=catalog.find(p=>p.id===v?.product_id);
+   const quantity=delta===0?0:Math.max(0,(item?.quantity||0)+delta);
+   if(delta>0&&(!p?.active||p.archived||!p.price||quantity>Math.min(20,v?.stock||0)))throw Error('No hay más unidades disponibles de esta talla.');
+   if(uid){
+    const result=quantity?await client.from('ob_cart_items').upsert({user_id:uid,variant_id:id,quantity}):await client.from('ob_cart_items').delete().eq('user_id',uid).eq('variant_id',id);
+    if(result.error)throw result.error;
+   }
+   if(C.user?.id!==uid)return;
+   basket=basket.filter(i=>i.variant_id!==id);if(quantity)basket.push({variant_id:id,quantity});
+   if(!uid)remember();count();
+  }finally{cartBusy=false;}
+ }
+ async function clearCart(){
+  await syncUser();if(cartBusy)throw Error('Espera a que termine de guardarse el carrito.');
+  const uid=C.user?.id;cartBusy=true;
+  try{
+   if(uid){const {error}=await client.from('ob_cart_items').delete().eq('user_id',uid);if(error)throw error;}
+   if(C.user?.id!==uid)return;
+   basket=[];if(!uid)remember();count();
+  }finally{cartBusy=false;}
+  await openCart();
  }
  async function openCart(){
   await syncUser();await load();count();
-  show('<h2>Tu carrito</h2>'+(!basket.length?'<p>Tu carrito está vacío.</p>':'')+basket.map(i=>{const v=sizes.find(v=>v.id===i.variant_id),p=catalog.find(p=>p.id===v?.product_id);return '<div class="ob-row"><span>'+esc(p?.name||'Producto no disponible')+' / '+esc(v?.size||'')+'<br>'+money((p?.price||0)*i.quantity)+'</span><div><button data-change="'+i.variant_id+'" data-delta="-1" aria-label="Disminuir cantidad">−</button> '+i.quantity+' <button data-change="'+i.variant_id+'" data-delta="1" aria-label="Aumentar cantidad">+</button><button data-change="'+i.variant_id+'" data-delta="0">Eliminar</button></div></div>';}).join('')+'<p>Subtotal: '+money(basket.reduce((sum,i)=>{const v=sizes.find(v=>v.id===i.variant_id);return sum+(catalog.find(p=>p.id===v?.product_id)?.price||0)*i.quantity;},0))+'</p>'+(basket.length?'<button id="ob-checkout">Continuar con mi pedido</button>':'')+'<p id="ob-cart-feedback" role="status"></p>');
-  document.querySelectorAll('[data-change]').forEach(b=>b.onclick=()=>run(b,async()=>{
-   const i=basket.find(i=>i.variant_id===b.dataset.change),delta=Number(b.dataset.delta),v=sizes.find(v=>v.id===i.variant_id);
-   if(delta>0&&i.quantity>=Math.min(20,v?.stock||0))throw Error('Stock insuficiente.');
-   i.quantity=delta===0?0:i.quantity+delta;
-   if(i.quantity===0){basket=basket.filter(x=>x!==i);if(C.user){const {error}=await client.from('ob_cart_items').delete().eq('user_id',C.user.id).eq('variant_id',i.variant_id);if(error)throw error;}}
-   await saveCart();await openCart();
-  }));
+  const subtotal=basket.reduce((sum,i)=>{const v=sizes.find(v=>v.id===i.variant_id);return sum+(catalog.find(p=>p.id===v?.product_id)?.price||0)*i.quantity;},0);
+  show('<h2>Tu carrito</h2>'+(!basket.length?'<p>Tu carrito está vacío.</p><a href="index.html#productos">Ver productos</a>':'')+basket.map(i=>{
+   const v=sizes.find(v=>v.id===i.variant_id),p=catalog.find(p=>p.id===v?.product_id),unavailable=!p?.active||p.archived||!p.price||!v?.stock;
+   const photo=p?.image_path?client.storage.from('product-images').getPublicUrl(p.image_path).data.publicUrl:'logo-overblack.svg';
+   return '<div class="ob-row ob-cart-row"><div class="ob-cart-product"><img src="'+esc(photo)+'" alt="'+esc(p?.name||'Producto')+'" width="64" height="80"><div><b>'+esc(p?.name||'Producto no disponible')+'</b><br>Talla: '+esc(v?.size||'—')+'<br>Precio unitario: '+money(p?.price||0)+'<br>Importe: '+money((p?.price||0)*i.quantity)+(unavailable?'<p>Ya no está disponible. Elimínalo para continuar.</p>':i.quantity>v.stock?'<p>Solo quedan '+v.stock+' unidades. Reduce la cantidad.</p>':'')+'</div></div><div><button data-change="'+i.variant_id+'" data-delta="-1" aria-label="Disminuir cantidad">−</button> '+i.quantity+' <button data-change="'+i.variant_id+'" data-delta="1" aria-label="Aumentar cantidad" '+(unavailable||i.quantity>=Math.min(20,v.stock)?'disabled':'')+'>+</button><button data-change="'+i.variant_id+'" data-delta="0">Eliminar</button></div></div>';
+  }).join('')+(basket.length?'<p><strong>Subtotal: '+money(subtotal)+'</strong></p><p>El descuento y la entrega se calculan al revisar el pedido.</p><button id="ob-checkout">Continuar con mi pedido</button><button id="ob-clear-cart" class="ob-secondary">Vaciar carrito</button>':'')+'<p id="ob-cart-feedback" role="status"></p>');
+  document.querySelectorAll('[data-change]').forEach(b=>b.onclick=()=>run(b,async()=>{await changeCart(b.dataset.change,Number(b.dataset.delta));await openCart();}));
+  document.getElementById('ob-clear-cart')?.addEventListener('click',e=>run(e.target,clearCart));
   document.getElementById('ob-checkout')?.addEventListener('click',()=>run(null,checkout));
  }
  async function checkout(){
-  remember();if(!await C.requireUser())return;await C.refresh();await load();
+  if(cartBusy)throw Error('Espera a que termine de guardarse el carrito.');
+  if(!C.user)remember();if(!await C.requireUser())return;await C.refresh();await load();
   if(!settings.checkout_enabled||settings.maintenance)throw Error('Las compras todavía no están habilitadas.');
   show('<h2>Datos de entrega</h2><p>Puntos disponibles: '+C.account.points+'</p><form id="ob-checkout-form"><label>Entrega<select name="mode"><option value="lima">Lima Metropolitana · contraentrega</option><option value="shalom">Provincias · Shalom</option></select></label><label>Nombre completo<input name="recipient" required minlength="3" maxlength="150"></label><label>Celular<input name="phone" type="tel" required pattern="[+0-9 ()-]{9,20}" maxlength="20"></label><div id="ob-delivery-fields"></div><label>Referencia<input name="reference" maxlength="250"></label><label>Usar puntos<select name="reward"><option value="0">Guardar mis puntos</option>'+(C.account.rewards||[[2500,5],[5000,10],[10000,15]]).map(([n,p])=>'<option value="'+n+'" '+(C.account.points<n?'disabled':'')+'>'+n+' puntos = '+p+'%</option>').join('')+'</select></label><label>Cupón (opcional, no acumulable con puntos)<input name="coupon" maxlength="30"></label><button>Revisar pedido</button></form>');
   const form=document.getElementById('ob-checkout-form');
