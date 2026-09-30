@@ -101,3 +101,15 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Migración overblack_customer_order_history aplicada. Sintaxis correcta y acceso sin sesión rechazado; pruebas completas con pedidos reservadas para el final.
 - Direcciones publicadas: respaldo main a1e9b70dbaadaaf5b919cbcb320c2b6d7997c8fe. Mi Cuenta muestra Mis direcciones.
 
+
+- Publicación final confirmada en OVERBLACK.store: login.js?v=28, delivery-addresses.js?v=27. Respaldo main a3267a8d156cfba04533bec9059e37c564368106. Formulario público de cuenta abre correctamente con departamentos/provincias/distritos.
+- Para el cierre: cargar saved-delivery-addresses.sql y customer-order-history.sql en el entorno de pruebas; actualizar datos de prueba Shalom con departamento/provincia; probar aislamiento entre clientes, guardado/edición/eliminación, ida/vuelta del resumen, historial y paginación con pedidos reales de prueba controlados. Las pruebas completas no se ejecutaron en este bloque por instrucción del propietario.
+
+
+## Gestión operativa — 30 septiembre
+- Pedidos: filtros de estado, modalidad y número; importes de adelanto/saldo; confirmación explícita antes de registrar adelanto y entrega/cobro. Conserva historial y paginación.
+- Supabase exige referencia Shalom antes de marcar enviado. Guardar la misma referencia no duplica eventos. Se conservan cancelación y reposición atómicas.
+- Correo order-email versión 6 desplegada: motivo del aviso separado del estado actual, importes y cancelación sin prometer devolución monetaria automática. SMTP sin cambios; recepción real pendiente para pruebas finales.
+- Configuración: guardar solo cambios, rechazo de ediciones simultáneas del mismo ajuste, lista de datos por completar y vista previa de textos del correo. Migración aplicada; comprobación en transacción revertida, sin cambios persistentes.
+- Pruebas completas de pedidos/entregas/correos pendientes al cierre por indicación del propietario.
+

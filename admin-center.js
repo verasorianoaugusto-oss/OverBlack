@@ -1,5 +1,7 @@
 window.OBAdminCenter=async function(section,{client,rpc,select,show,run,status,esc}){
+ const uid=window.OBCommerce.user?.id;if(!uid)return;
  const rows=await select('ob_settings'),settings=rows[0].value;
+ if(window.OBCommerce.user?.id!==uid)return;
  if(section==='settings'){
   const texts={home_text:'Texto de Inicio (vacío conserva el actual)',about_text:'Texto de Nosotros (vacío conserva el actual)',contact_text:'Texto de Contacto (vacío conserva el actual)',banner_text:'Banner de promoción',benefits:'Beneficios para clientes',email_intro:'Introducción de correos de pedido',store_name:'Nombre de la tienda',whatsapp:'WhatsApp (código país y número)',instagram:'Instagram',tiktok:'TikTok',announcement:'Aviso de tienda',shalom_instructions:'Instrucciones Shalom',email_signature:'Firma de correos',faq:'Preguntas frecuentes',terms:'Términos y condiciones',privacy:'Privacidad',returns:'Cambios y devoluciones',shipping_policy:'Política de envíos'};
   const flags={checkout_enabled:'Habilitar compras',maintenance:'Modo mantenimiento de compras',lima_enabled:'Entregas Lima habilitadas',province_enabled:'Envíos Shalom habilitados'};
@@ -8,9 +10,27 @@ window.OBAdminCenter=async function(section,{client,rpc,select,show,run,status,e
   const groups={'Tienda y contacto':['store_name','whatsapp','instagram','tiktok','announcement'],'Compras y entregas':['checkout_enabled','maintenance','lima_enabled','province_enabled','lima_fee','deposit_percent','shalom_instructions'],'Productos y promociones':['low_stock','general_discount','banner_text','benefits'],'Correos de pedidos':['email_signature','email_intro'],'STACK y recompensas':['daily_games','normal_points','perfect_points','rewards'],'Contenido y políticas':['home_text','about_text','contact_text','faq','terms','privacy','returns','shipping_policy']};
   form.querySelector('h3')?.remove();const submit=form.querySelector('button');
   for(const [title,keys] of Object.entries(groups)){const group=document.createElement('fieldset'),legend=document.createElement('legend');legend.textContent=title;group.append(legend);for(const key of keys)group.append(form.elements[key].closest('label'));form.insertBefore(group,submit);}
-  document.getElementById('ob-settings-form').onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(e.target),value=Object.fromEntries(f);for(const k of Object.keys(flags))value[k]=f.has(k);value.lima_fee=f.get('lima_fee')===''?null:Math.round(Number(f.get('lima_fee'))*100);value.deposit_percent=Number(f.get('deposit_percent'));value.low_stock=Number(f.get('low_stock'));value.general_discount=Number(f.get('general_discount'));for(const k of ['daily_games','normal_points','perfect_points'])value[k]=Number(f.get(k));value.rewards=String(f.get('rewards')).trim().split(/\r?\n/).map(row=>row.split('=').map(Number));await rpc('ob_settings_save',{p_value:value});window.dispatchEvent(new CustomEvent('ob:settings',{detail:{...settings,...value}}));try{await window.OBCommerce.refresh();}catch{}status('Configuración guardada.');});};
+  const readiness=document.createElement('p');readiness.setAttribute('role','status');form.before(readiness);
+  const review=()=>{const missing=[];if(form.elements.lima_enabled.checked&&form.elements.lima_fee.value==='')missing.push('tarifa Lima');for(const k of ['terms','privacy','returns','shipping_policy'])if(!form.elements[k].value.trim())missing.push(texts[k]);readiness.textContent=missing.length?'Por completar antes de vender: '+missing.join(', ')+'.':'Datos de entrega y textos completados. Revisa también productos, stock y el recorrido de compra antes de habilitar ventas.';};
+  form.addEventListener('input',review);review();
+  const preview=document.createElement('button');preview.type='button';preview.textContent='Vista previa del texto de correo';
+  const previewText=document.createElement('pre');previewText.style.whiteSpace='pre-wrap';previewText.hidden=true;form.elements.email_intro.closest('fieldset').append(preview,previewText);
+  preview.onclick=()=>{previewText.textContent=[form.elements.email_intro.value,'[Número de pedido]','[Estado, total, adelanto/saldo y referencia de envío]','Consulta los detalles en https://overblack.store/account.html',form.elements.email_signature.value].join('\n\n');previewText.hidden=false;};
+  form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{
+   if(window.OBCommerce.user?.id!==uid)return;
+   const f=new FormData(form),value=Object.fromEntries(f);for(const k of Object.keys(flags))value[k]=f.has(k);
+   value.lima_fee=f.get('lima_fee')===''?null:Math.round(Number(f.get('lima_fee'))*100);for(const k of ['deposit_percent','low_stock','general_discount','daily_games','normal_points','perfect_points'])value[k]=Number(f.get(k));
+   value.rewards=String(f.get('rewards')).trim().split(/\r?\n/).map(row=>row.split('=').map(Number));
+   const patch={},expected={};for(const k of Object.keys(value))if(JSON.stringify(value[k])!==JSON.stringify(settings[k])){patch[k]=value[k];expected[k]=settings[k];}
+   if(!Object.keys(patch).length){status('No hay cambios por guardar.');return;}
+   await rpc('ob_settings_patch',{p_value:patch,p_expected:expected});Object.assign(settings,patch);
+   if(window.OBCommerce.user?.id!==uid)return;
+   try{const latest=(await select('ob_settings'))[0].value;if(window.OBCommerce.user?.id!==uid)return;window.dispatchEvent(new CustomEvent('ob:settings',{detail:latest}));await window.OBCommerce.refresh();}catch{}
+   if(window.OBCommerce.user?.id===uid)status('Cambios guardados.');
+  });};
  }else if(section==='recovery'){
   const products=(await select('ob_products')).filter(p=>p.deleted_at);
+  if(window.OBCommerce.user?.id!==uid)return;
   show('<h2>Recuperación de productos</h2><p>Los productos de la papelera conservan foto, precio, tallas y stock. Al restaurarlos permanecerán ocultos hasta que revises sus datos.</p>'+(!products.length?'<p>La papelera está vacía.</p>':products.map(p=>'<div class="ob-row"><span>'+esc(p.name)+'<br>'+esc(new Date(p.deleted_at).toLocaleString('es-PE'))+'</span><button data-restore="'+p.id+'">Restaurar producto</button></div>').join(''))+'<p>Esta papelera permite recuperar productos retirados desde ahora; no recupera eliminaciones anteriores.</p>',true);
   document.querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>run(b,async()=>{await rpc('ob_product_manage',{p_action:'restore',p_product:Number(b.dataset.restore)});await window.OBAdminCenter(section,{client,rpc,select,show,run,status,esc});status('Producto restaurado y oculto. Revísalo en Productos / stock antes de volver a venderlo.');}));
  }else if(section==='coupons'){
@@ -19,6 +39,7 @@ window.OBAdminCenter=async function(section,{client,rpc,select,show,run,status,e
   form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{const f=new FormData(form);await rpc('ob_coupon_save',{p_code:f.get('code'),p_percent:Number(f.get('percent')),p_expires:new Date(f.get('expires')).toISOString(),p_active:f.has('active')});await window.OBAdminCenter(section,{client,rpc,select,show,run,status,esc});status('Cupón guardado.');});};
  }else{
   const data=await rpc('ob_admin_report');
+  if(window.OBCommerce.user?.id!==uid)return;
   if(section==='dashboard')show('<h2>Dashboard OVERBLACK</h2><p>Clientes: '+data.customers+' · Partidas STACK: '+data.games+'</p><p>Puntos ganados: '+data.earned+' · Canjeados: '+data.spent+'</p><p>Pedidos entregados, agrupados por fecha de compra: hoy S/ '+(data.today/100).toFixed(2)+' · últimos 7 días S/ '+(data.week/100).toFixed(2)+' · mes S/ '+(data.month/100).toFixed(2)+'</p><h3>Pedidos por estado</h3>'+data.statuses.map(s=>'<p>'+esc(s.status)+': '+s.count+'</p>').join('')+'<h3>Stock bajo</h3>'+(!data.low_stock.length?'<p>No hay tallas con stock bajo.</p>':'')+data.low_stock.map(s=>'<p>'+esc(s.name)+' / '+esc(s.size)+': '+s.stock+'</p>').join('')+'<h3>Más vendidos (entregados)</h3>'+data.best_sellers.map(s=>'<p>'+esc(s.name)+': '+s.quantity+'</p>').join(''),true);
   else if(section==='errors')show('<h2>Centro de errores</h2><p>Servicio de correo: '+esc(data.mail_health?.last_status||'Todavía sin actividad')+'<br>Última revisión: '+esc(data.mail_health?.last_run?new Date(data.mail_health.last_run).toLocaleString('es-PE'):'Sin registro')+'</p><p>Correos pendientes: '+data.pending_emails+'</p>'+data.errors.map(e=>'<p>Pedido #'+e.order_id+' · Intentos: '+e.attempts+' · '+esc(e.last_error||'Pendiente de procesar')+(e.last_error?'<br><button data-retry-email="'+e.id+'">Reintentar envío</button>':'')+'</p>').join('')+'<p>Revisa el servicio de correo si los pendientes no disminuyen. Los pedidos y puntos se conservan.</p>',true);
   else if(section==='audit')show('<h2>Auditoría</h2>'+data.audit.map(e=>'<p>'+esc(new Date(e.created_at).toLocaleString('es-PE'))+' · '+esc(e.action)+' · '+esc(e.actor)+'</p>').join(''),true);
