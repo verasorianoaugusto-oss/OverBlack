@@ -12,6 +12,9 @@
    if(settings[key]){el.textContent=settings[key];el.style.whiteSpace='pre-line';}else el.innerHTML=originalContent.get(key);
   }
   let banner=document.getElementById('ob-promotion');
+  let delivery=document.getElementById('ob-delivery-notice');
+  if(!delivery&&document.getElementById('productos')){delivery=document.createElement('p');delivery.id='ob-delivery-notice';delivery.className='ob-store-notice container';document.getElementById('productos').prepend(delivery);}
+  if(delivery)delivery.textContent=[settings.lima_enabled?'Lima Metropolitana: pago contraentrega.':'',settings.province_enabled?'Provincias: Shalom con '+settings.deposit_percent+'% de adelanto. Flete por coordinar aparte.':''].filter(Boolean).join(' ');
   if(!banner&&document.getElementById('productos')){banner=document.createElement('p');banner.id='ob-promotion';banner.className='ob-store-notice container';document.getElementById('productos').prepend(banner);}
   if(banner){banner.textContent=[settings.banner_text,settings.general_discount>0?'Promoción: '+settings.general_discount+'% de descuento en productos. No acumulable con cupones ni puntos.':'',settings.benefits].filter(Boolean).join('\n');banner.hidden=!banner.textContent;}
   for(const [key,domain] of [['instagram','instagram.com'],['tiktok','tiktok.com']]){

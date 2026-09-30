@@ -95,6 +95,7 @@
   }).join('')+(basket.length?'<p><strong>Subtotal: '+money(subtotal)+'</strong></p><p>El descuento y la entrega se calculan al revisar el pedido.</p><button id="ob-checkout">Continuar con mi pedido</button><button id="ob-clear-cart" class="ob-secondary">Vaciar carrito</button>':'')+'<p id="ob-cart-feedback" role="status"></p>');
   document.querySelectorAll('[data-change]').forEach(b=>b.onclick=()=>run(b,async()=>{await changeCart(b.dataset.change,Number(b.dataset.delta));await openCart();}));
   document.getElementById('ob-clear-cart')?.addEventListener('click',e=>run(e.target,clearCart));
+  const deliveryInfo=document.createElement('p');deliveryInfo.textContent=[settings.lima_enabled?'Lima Metropolitana: pago contraentrega.':'',settings.province_enabled?'Provincias: Shalom con '+settings.deposit_percent+'% de adelanto. Flete por coordinar aparte.':''].filter(Boolean).join(' ');document.getElementById('ob-cart-feedback').before(deliveryInfo);
   document.getElementById('ob-checkout')?.addEventListener('click',()=>run(null,checkout));
  }
  async function checkout(draft={}){
@@ -120,7 +121,7 @@
    if(C.user?.id!==checkoutUser)return;
    delivery.expected_total=quote.total;delivery.expected_advance=quote.advance_due;
    const request=crypto.randomUUID();
-   show('<h2>Revisa tu pedido</h2>'+quote.items.map(i=>'<p>'+esc(i.name)+' · '+esc(i.size)+' × '+i.quantity+' · '+money(i.unit_price*i.quantity)+'</p>').join('')+'<p>'+esc(delivery.recipient)+' · '+esc(delivery.phone)+'<br>'+esc(delivery.department)+' · '+esc(delivery.province)+'<br>'+esc(delivery.address||delivery.destination)+' · '+esc(delivery.district||delivery.agency)+'</p><p>Subtotal: '+money(quote.subtotal)+'<br>Entrega: '+(delivery.mode==='shalom'?'Flete Shalom por coordinar':money(quote.shipping))+'<br>Descuento: '+money(quote.discount)+'<br>Puntos usados: '+quote.points_spent+'</p><h3>Total: '+money(quote.total)+'</h3><p>'+(quote.advance_due?'Adelanto: '+money(quote.advance_due)+' · Saldo: '+money(quote.total-quote.advance_due):'Pago contraentrega')+'</p><button id="ob-confirm-order">Confirmar pedido</button><button id="ob-edit-order">Editar datos</button>');
+   show('<h2>Revisa tu pedido</h2>'+quote.items.map(i=>'<p>'+esc(i.name)+' · '+esc(i.size)+' × '+i.quantity+' · '+money(i.unit_price*i.quantity)+'</p>').join('')+'<p>'+esc(delivery.recipient)+' · '+esc(delivery.phone)+'<br>'+esc(delivery.department)+' · '+esc(delivery.province)+'<br>'+esc(delivery.address||delivery.destination)+' · '+esc(delivery.district||delivery.agency)+'</p><p>Subtotal: '+money(quote.subtotal)+'<br>Entrega: '+(delivery.mode==='shalom'?'Flete Shalom por coordinar':money(quote.shipping))+'<br>Descuento: '+money(quote.discount)+' ('+Number(quote.discount_percent||0)+'%)<br>Puntos usados: '+quote.points_spent+'</p><h3>Total: '+money(quote.total)+'</h3><p>'+(quote.advance_due?'Adelanto: '+money(quote.advance_due)+' · Saldo: '+money(quote.total-quote.advance_due):'Pago contraentrega')+'</p><button id="ob-confirm-order">Confirmar pedido</button><button id="ob-edit-order">Editar datos</button>');
    document.getElementById('ob-edit-order').onclick=()=>run(null,()=>checkout(draft));
    document.getElementById('ob-confirm-order').onclick=e=>run(e.target,async()=>{
     if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');

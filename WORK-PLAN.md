@@ -113,3 +113,10 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Configuración: guardar solo cambios, rechazo de ediciones simultáneas del mismo ajuste, lista de datos por completar y vista previa de textos del correo. Migración aplicada; comprobación en transacción revertida, sin cambios persistentes.
 - Pruebas completas de pedidos/entregas/correos pendientes al cierre por indicación del propietario.
 
+
+- Cupones y dashboard: uso por cupón con pedidos sin cancelar, entregados y cancelados; descuento de entregados; puntos restituidos y canjes netos. Usa pedidos y movimientos existentes, sin nuevas tablas. Migración overblack_promotion_report aplicada.
+
+
+- Lista 200: estado Confirmado añadido entre recibido/adelanto confirmado y preparación; se mantienen transiciones antiguas por compatibilidad. Reglas de entrega en catálogo y carrito. Checkout muestra porcentaje exacto calculado por servidor.
+- Correo versión 7 activa con estado Confirmado. Sintaxis JS comprobada. Seguridad sin avisos nuevos; pendientes históricos de pg_net y contraseñas filtradas siguen documentados.
+

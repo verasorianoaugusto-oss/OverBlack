@@ -121,7 +121,7 @@
     if(accountPage)dialog.scrollIntoView({block:'start'});
   }
 
-  const statusLabels={pendiente_adelanto:'Pendiente de adelanto',adelanto_confirmado:'Adelanto confirmado',nuevo:'Nuevo',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
+  const statusLabels={pendiente_adelanto:'Pendiente de adelanto',adelanto_confirmado:'Adelanto confirmado',nuevo:'Pedido recibido',confirmado:'Confirmado',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
   async function orders(isAdmin,page=0) {
     await refresh();if(!user||(isAdmin&&!account?.admin))throw Error('Acceso denegado.');
     if(window.OBOrders)return window.OBOrders({client,rpc,show,run,esc},isAdmin,page);
