@@ -97,25 +97,35 @@
   document.getElementById('ob-clear-cart')?.addEventListener('click',e=>run(e.target,clearCart));
   document.getElementById('ob-checkout')?.addEventListener('click',()=>run(null,checkout));
  }
- async function checkout(){
+ async function checkout(draft={}){
   if(cartBusy)throw Error('Espera a que termine de guardarse el carrito.');
   if(!C.user)remember();if(!await C.requireUser())return;await C.refresh();await load();
   if(!settings.checkout_enabled||settings.maintenance)throw Error('Las compras todavía no están habilitadas.');
-  show('<h2>Datos de entrega</h2><p>Puntos disponibles: '+C.account.points+'</p><form id="ob-checkout-form"><label>Entrega<select name="mode"><option value="lima">Lima Metropolitana · contraentrega</option><option value="shalom">Provincias · Shalom</option></select></label><label>Nombre completo<input name="recipient" required minlength="3" maxlength="150"></label><label>Celular<input name="phone" type="tel" required pattern="[+0-9 ()-]{9,20}" maxlength="20"></label><div id="ob-delivery-fields"></div><label>Referencia<input name="reference" maxlength="250"></label><label>Usar puntos<select name="reward"><option value="0">Guardar mis puntos</option>'+(C.account.rewards||[[2500,5],[5000,10],[10000,15]]).map(([n,p])=>'<option value="'+n+'" '+(C.account.points<n?'disabled':'')+'>'+n+' puntos = '+p+'%</option>').join('')+'</select></label><label>Cupón (opcional, no acumulable con puntos)<input name="coupon" maxlength="30"></label><button>Revisar pedido</button></form>');
+  const checkoutUser=C.user.id;
+  const [options,addresses]=await Promise.all([rpc('ob_delivery_options'),rpc('ob_address_book')]);
+  if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
+  let savedAddressId=draft.saved_address_id||null;
+  show('<h2>Datos de entrega</h2><p>Puntos disponibles: '+C.account.points+'</p><form id="ob-checkout-form"><label>Dirección guardada<select name="saved_address_id"><option value="">Usar una dirección nueva</option>'+addresses.map(a=>'<option value="'+a.id+'">'+esc(a.delivery.recipient+' · '+(a.delivery.district||a.delivery.destination||a.delivery.province))+'</option>').join('')+'</select></label><label>Nombre completo<input name="recipient" required minlength="3" maxlength="150" autocomplete="name"></label><label>Celular<input name="phone" type="tel" required pattern="[+0-9 ()-]{9,20}" maxlength="20" autocomplete="tel"></label><div data-delivery-fields></div><label>Referencia<input name="reference" maxlength="250"></label><label class="ob-check"><input name="save_address" type="checkbox"> Guardar estos datos en mis direcciones</label><label>Usar puntos<select name="reward"><option value="0">Guardar mis puntos</option>'+(C.account.rewards||[[2500,5],[5000,10],[10000,15]]).map(([n,p])=>'<option value="'+n+'" '+(C.account.points<n?'disabled':'')+'>'+n+' puntos = '+p+'%</option>').join('')+'</select></label><label>Cupón (opcional, no acumulable con puntos)<input name="coupon" maxlength="30"></label><button>Revisar pedido</button></form>');
   const form=document.getElementById('ob-checkout-form');
-  for(const option of [...form.elements.mode.options])if((option.value==='lima'&&!settings.lima_enabled)||(option.value==='shalom'&&!settings.province_enabled))option.remove();
-  if(!form.elements.mode.options.length)throw Error('No hay modalidades de entrega disponibles en este momento.');
-  const fields=()=>document.getElementById('ob-delivery-fields').innerHTML=form.elements.mode.value==='lima'?'<label>Distrito de Lima Metropolitana<input name="district" required minlength="2" maxlength="80"></label><label>Dirección<input name="address" required minlength="5" maxlength="250"></label>':'<label>Ciudad / destino<input name="destination" required minlength="3" maxlength="150"></label><label>Agencia Shalom<input name="agency" required minlength="3" maxlength="150"></label><p>'+esc(settings.shalom_instructions)+' Adelanto: '+settings.deposit_percent+'%. El flete de Shalom se coordina aparte y no está incluido en este total.</p>';
-  form.elements.mode.onchange=fields;fields();
+  const fillAddress=d=>{for(const name of ['recipient','phone','reference'])form.elements[name].value=d[name]||'';window.OBDeliveryFields(form,options,esc,d,settings.deposit_percent);};
+  fillAddress(draft);form.elements.saved_address_id.value=savedAddressId||'';
+  form.elements.reward.value=String(draft.reward||0);form.elements.coupon.value=draft.coupon||'';form.elements.save_address.checked=draft.save_address==='on';
+  form.elements.saved_address_id.onchange=()=>{savedAddressId=form.elements.saved_address_id.value||null;fillAddress(addresses.find(a=>a.id===savedAddressId)?.delivery||{});form.elements.save_address.checked=false;};
   form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{
-   const delivery=Object.fromEntries(new FormData(form)),reward=Number(delivery.reward),items=basket.map(i=>({...i}));delete delivery.reward;
+   draft=Object.fromEntries(new FormData(form));const delivery={...draft},reward=Number(delivery.reward),items=basket.map(i=>({...i}));delete delivery.reward;delete delivery.save_address;delete delivery.saved_address_id;
    const quote=await rpc('ob_checkout',{p_items:items,p_delivery:delivery,p_reward:reward});
+   if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
+   Object.assign(delivery,quote.delivery);
+   if(draft.save_address==='on'){const saved=await rpc('ob_address_book',{p_action:'save',p_id:savedAddressId,p_delivery:delivery});savedAddressId=saved.id;draft.saved_address_id=saved.id;}
+   if(C.user?.id!==checkoutUser)return;
    delivery.expected_total=quote.total;delivery.expected_advance=quote.advance_due;
    const request=crypto.randomUUID();
-   show('<h2>Revisa tu pedido</h2>'+quote.items.map(i=>'<p>'+esc(i.name)+' · '+esc(i.size)+' × '+i.quantity+' · '+money(i.unit_price*i.quantity)+'</p>').join('')+'<p>'+esc(delivery.recipient)+' · '+esc(delivery.phone)+'<br>'+esc(delivery.address||delivery.destination)+' · '+esc(delivery.district||delivery.agency)+'</p><p>Subtotal: '+money(quote.subtotal)+'<br>Entrega: '+(delivery.mode==='shalom'?'Flete Shalom por coordinar':money(quote.shipping))+'<br>Descuento: '+money(quote.discount)+'<br>Puntos usados: '+quote.points_spent+'</p><h3>Total: '+money(quote.total)+'</h3><p>'+(quote.advance_due?'Adelanto: '+money(quote.advance_due)+' · Saldo: '+money(quote.total-quote.advance_due):'Pago contraentrega')+'</p><button id="ob-confirm-order">Confirmar pedido</button><button id="ob-edit-order">Editar datos</button>');
-   document.getElementById('ob-edit-order').onclick=()=>run(null,checkout);
+   show('<h2>Revisa tu pedido</h2>'+quote.items.map(i=>'<p>'+esc(i.name)+' · '+esc(i.size)+' × '+i.quantity+' · '+money(i.unit_price*i.quantity)+'</p>').join('')+'<p>'+esc(delivery.recipient)+' · '+esc(delivery.phone)+'<br>'+esc(delivery.department)+' · '+esc(delivery.province)+'<br>'+esc(delivery.address||delivery.destination)+' · '+esc(delivery.district||delivery.agency)+'</p><p>Subtotal: '+money(quote.subtotal)+'<br>Entrega: '+(delivery.mode==='shalom'?'Flete Shalom por coordinar':money(quote.shipping))+'<br>Descuento: '+money(quote.discount)+'<br>Puntos usados: '+quote.points_spent+'</p><h3>Total: '+money(quote.total)+'</h3><p>'+(quote.advance_due?'Adelanto: '+money(quote.advance_due)+' · Saldo: '+money(quote.total-quote.advance_due):'Pago contraentrega')+'</p><button id="ob-confirm-order">Confirmar pedido</button><button id="ob-edit-order">Editar datos</button>');
+   document.getElementById('ob-edit-order').onclick=()=>run(null,()=>checkout(draft));
    document.getElementById('ob-confirm-order').onclick=e=>run(e.target,async()=>{
+    if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
     const order=await rpc('ob_checkout',{p_items:items,p_delivery:delivery,p_reward:reward,p_request:request,p_commit:true});
+    if(C.user?.id!==checkoutUser)return;
     basket=[];remember();count();let error=null;
     try{const result=await client.from('ob_cart_items').delete().eq('user_id',C.user.id);error=result.error;}catch(e){error=e;}
     try{await C.refresh();}catch{}

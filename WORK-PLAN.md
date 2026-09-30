@@ -85,3 +85,12 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Incrementar/descontar/eliminar actualiza la pantalla solo tras guardar correctamente; operaciones de la misma pestaña serializadas y cuenta comprobada antes de mostrar resultado.
 - Cantidades superiores al stock o productos ya no disponibles muestran instrucciones claras; botón + deshabilitado al alcanzar stock/límite.
 - No se cambian descuentos ni validación de checkout. Sintaxis correcta; recorrido con mercancía y compra reservado para pruebas finales.
+
+- Publicación confirmada en OVERBLACK.store: interfaz con shop.js y commerce.css versión 26; stock-history.js versión 25. Último bloque de carrito en main: 522989911a0a2df7261265f33c3e050a010e6800. Fuentes nuevas product-details.sql, stock-history.sql y las tres mejoras de puntos/STACK respaldadas en database/. Pendiente prioritario siguiente: direcciones guardadas del checkout y validación geográfica Lima/Shalom; pruebas completas al final.
+
+## Direcciones y validación de entrega — 29 septiembre
+- Se reutiliza ob_addresses para guardar hasta 10 destinos por cuenta, editarlos/eliminarlos y elegirlos al comprar. RLS por propietario conservada; escrituras por función autenticada validada.
+- Provincia de Lima: selección entre 43 distritos oficiales, modalidad contraentrega. Otros destinos: Shalom, con ciudad/agencia y adelanto configurado (actualmente 50%). Las provincias fuera de Lima se introducen como texto; no se verifica disponibilidad real de la agencia.
+- Fuente geográfica: https://www.gob.pe/institucion/pcm/campa%C3%B1as/4355-lima-metropolitana-informacion-territorial y listado de distritos de CENEPRED/INEI.
+- Checkout conserva datos al volver desde el resumen y guarda direcciones solo si el cliente lo solicita. Pedido conserva departamento y provincia.
+- Migración overblack_saved_addresses_and_delivery_validation aplicada. Comprobación mínima de Lima/Shalom en transacción revertida: dos destinos válidos; no quedaron direcciones de prueba. Sintaxis correcta, recorrido completo al final.

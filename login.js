@@ -152,6 +152,7 @@
     renderAccountStats();
     document.getElementById('ob-profile').onclick=()=>run(null,()=>window.OBEditProfile({client,user,account,rpc,show,run,status,esc,refresh,openAccount}));
     document.getElementById('ob-my-orders').onclick=()=>run(null,()=>orders(false));
+    const addressesButton=document.createElement('button');addressesButton.textContent='Mis direcciones';addressesButton.onclick=()=>run(addressesButton,()=>window.OBAddressBook({rpc,show,run,esc,openAccount}));document.getElementById('ob-my-orders').after(addressesButton);
     document.getElementById('ob-my-points').onclick=()=>run(null,()=>pointsHistory());
     const rewardsButton=document.createElement('button');rewardsButton.textContent='Mis descuentos';rewardsButton.onclick=()=>run(rewardsButton,()=>rewardsHistory());document.getElementById('ob-my-points').after(rewardsButton);
     document.getElementById('ob-admin')?.addEventListener('click',()=>run(null,admin));
@@ -198,7 +199,7 @@
       if(client){
         client.auth.onAuthStateChange((event,session)=>{
           user=session?.user||null;
-          if(event==='SIGNED_OUT')acceptAccount(null);
+          if(event==='SIGNED_OUT'){acceptAccount(null);if(accountPage)auth();else{dialog.close();dialog.innerHTML='';}}
           else if(event!=='INITIAL_SESSION')setTimeout(()=>refresh().catch(()=>{}),0);
           if(event==='PASSWORD_RECOVERY'){recovery=true;setTimeout(()=>auth('reset'),0);}
         });
