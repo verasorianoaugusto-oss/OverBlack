@@ -124,6 +124,7 @@
   const statusLabels={pendiente_adelanto:'Pendiente de adelanto',adelanto_confirmado:'Adelanto confirmado',nuevo:'Nuevo',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
   async function orders(isAdmin,page=0) {
     await refresh();if(!user||(isAdmin&&!account?.admin))throw Error('Acceso denegado.');
+    if(window.OBOrders)return window.OBOrders({client,rpc,show,run,esc},isAdmin,page);
     const owner=user.id;
     let query=client.from('ob_orders').select('*,ob_order_items(*)').order('id',{ascending:false}).range(page*25,page*25+25);
     if(!isAdmin)query=query.eq('user_id',user.id);
