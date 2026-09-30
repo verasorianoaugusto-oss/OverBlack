@@ -122,14 +122,36 @@
   }
 
   const statusLabels={pendiente_adelanto:'Pendiente de adelanto',adelanto_confirmado:'Adelanto confirmado',nuevo:'Nuevo',preparando:'Preparando',enviado:'Enviado',entregado:'Entregado / Pagado',cancelado:'Cancelado'};
-  async function orders(isAdmin) {
+  async function orders(isAdmin,page=0) {
     await refresh();if(!user||(isAdmin&&!account?.admin))throw Error('Acceso denegado.');
-    let query=client.from('ob_orders').select('*,ob_order_items(*)').order('created_at',{ascending:false}).limit(100);
+    const owner=user.id;
+    let query=client.from('ob_orders').select('*,ob_order_items(*)').order('id',{ascending:false}).range(page*25,page*25+25);
     if(!isAdmin)query=query.eq('user_id',user.id);
-    const {data,error}=await query;if(error)throw error;
+    const response=await query;if(response.error)throw response.error;
+    if(user?.id!==owner)return;
+    const data=response.data.slice(0,25);
     show('<h2>'+ (isAdmin?'OVERBLACK ADMIN · Pedidos':'Mis pedidos')+'</h2>'+(!data.length?'<p>No hay pedidos.</p>':'')+data.map(o=>'<div class="ob-row"><div><b>#OB-'+String(o.id).padStart(5,'0')+' · '+esc(statusLabels[o.status])+'</b><p>'+o.ob_order_items.map(i=>esc(i.name)+' / '+esc(i.size)+' × '+i.quantity).join('<br>')+'</p><p>'+money(o.total)+' · Descuento: '+money(o.discount)+' · Puntos usados: '+o.points_spent+' · '+(o.status==='entregado'?'Pagado':o.status==='cancelado'?'Cancelado':o.payment_method==='shalom_adelanto'?'Shalom · Adelanto '+money(o.advance_due):'Contra entrega — por cobrar')+'<br>'+esc(o.delivery.recipient)+' · '+esc(o.delivery.phone)+'<br>'+esc(o.delivery.address||o.delivery.destination)+' · '+esc(o.delivery.district||o.delivery.agency)+'<br>'+esc(o.delivery.reference)+(o.tracking?'<br>Envío: '+esc(o.tracking):'')+'</p>'+(isAdmin&&['preparando','enviado'].includes(o.status)?'<form data-tracking-form="'+o.id+'"><label>Código o referencia de envío<input name="tracking" required maxlength="100" value="'+esc(o.tracking||'')+'"></label><button>Guardar envío</button></form>':'')+(isAdmin&&!['entregado','cancelado'].includes(o.status)?'<div class="ob-actions">'+({pendiente_adelanto:['adelanto_confirmado','cancelado'],adelanto_confirmado:['preparando','cancelado'],nuevo:['preparando','cancelado'],preparando:['enviado','cancelado'],enviado:['entregado','cancelado']}[o.status]||[]).map(s=>'<button data-order="'+o.id+'" data-status="'+s+'">'+statusLabels[s]+'</button>').join('')+'</div>':'')+'</div></div>').join(''),true);
-    dialog.querySelectorAll('[data-tracking-form]').forEach(form=>form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{await rpc('ob_tracking',{p_order:Number(form.dataset.trackingForm),p_tracking:new FormData(form).get('tracking')});await orders(true);status('Información de envío guardada.');});});
-    dialog.querySelectorAll('[data-order]').forEach(b=>b.onclick=()=>run(b,async()=>{if(b.dataset.status==='cancelado'&&!confirm('¿Cancelar este pedido y devolver stock y puntos?'))return;if(b.dataset.status==='entregado'&&!confirm('¿Confirmas que el pedido fue entregado y cobrado?'))return;await rpc('ob_order_status',{p_order:Number(b.dataset.order),p_status:b.dataset.status});await orders(true);}));
+    dialog.querySelectorAll('.ob-row').forEach((row,i)=>{
+      const date=document.createElement('p');date.textContent='Creado: '+new Date(data[i].created_at).toLocaleString('es-PE',{timeZone:'America/Lima'})+' · Perú';
+      const history=document.createElement('button');history.textContent='Ver historial';history.onclick=()=>run(history,()=>orderHistory(data[i].id,isAdmin,page));
+      row.firstElementChild.append(date,history);
+    });
+    const pager=document.createElement('div');pager.className='ob-actions';
+    pager.innerHTML='<button id="ob-orders-prev" '+(!page?'disabled':'')+'>Anterior</button><span>Página '+(page+1)+'</span><button id="ob-orders-next" '+(response.data.length<=25?'disabled':'')+'>Siguiente</button>';
+    dialog.append(pager);
+    document.getElementById('ob-orders-prev').onclick=e=>run(e.target,()=>orders(isAdmin,page-1));
+    document.getElementById('ob-orders-next').onclick=e=>run(e.target,()=>orders(isAdmin,page+1));
+    document.querySelectorAll('[data-tracking-form]').forEach(form=>form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{await rpc('ob_tracking',{p_order:Number(form.dataset.trackingForm),p_tracking:new FormData(form).get('tracking')});await orders(true,page);status('Información de envío guardada.');});});
+    document.querySelectorAll('[data-order]').forEach(b=>b.onclick=()=>run(b,async()=>{if(b.dataset.status==='cancelado'&&!confirm('¿Cancelar este pedido y devolver stock y puntos?'))return;if(b.dataset.status==='entregado'&&!confirm('¿Confirmas que el pedido fue entregado y cobrado?'))return;await rpc('ob_order_status',{p_order:Number(b.dataset.order),p_status:b.dataset.status});await orders(true,page);}));
+  }
+  async function orderHistory(orderId,isAdmin,listPage,eventPage=0) {
+    const owner=user?.id;if(!owner)return;
+    const rows=await rpc('ob_order_history',{p_order:orderId,p_page:eventPage});
+    if(user?.id!==owner)return;
+    show('<h2>Historial del pedido #OB-'+String(orderId).padStart(5,'0')+'</h2>'+(!rows.length?'<p>Todavía no hay movimientos registrados.</p>':'')+rows.slice(0,50).map(e=>'<div class="ob-row"><div><b>'+esc(statusLabels[e.status]||(e.status==='tracking_actualizado'?'Información de envío actualizada':e.status))+'</b><p>'+esc(new Date(e.created_at).toLocaleString('es-PE',{timeZone:'America/Lima'}))+' · Perú</p></div></div>').join('')+'<div class="ob-actions"><button id="ob-events-prev" '+(!eventPage?'disabled':'')+'>Anterior</button><span>Página '+(eventPage+1)+'</span><button id="ob-events-next" '+(rows.length<=50?'disabled':'')+'>Siguiente</button></div><button id="ob-events-back">Volver a pedidos</button>');
+    document.getElementById('ob-events-prev').onclick=e=>run(e.target,()=>orderHistory(orderId,isAdmin,listPage,eventPage-1));
+    document.getElementById('ob-events-next').onclick=e=>run(e.target,()=>orderHistory(orderId,isAdmin,listPage,eventPage+1));
+    document.getElementById('ob-events-back').onclick=e=>run(e.target,()=>orders(isAdmin,listPage));
   }
   async function admin() {
     await refresh();if(!account?.admin)throw Error('Acceso denegado.');

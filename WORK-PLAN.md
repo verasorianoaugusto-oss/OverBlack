@@ -94,3 +94,10 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Fuente geográfica: https://www.gob.pe/institucion/pcm/campa%C3%B1as/4355-lima-metropolitana-informacion-territorial y listado de distritos de CENEPRED/INEI.
 - Checkout conserva datos al volver desde el resumen y guarda direcciones solo si el cliente lo solicita. Pedido conserva departamento y provincia.
 - Migración overblack_saved_addresses_and_delivery_validation aplicada. Comprobación mínima de Lima/Shalom en transacción revertida: dos destinos válidos; no quedaron direcciones de prueba. Sintaxis correcta, recorrido completo al final.
+
+## Historial de pedidos — 29 septiembre
+- Consulta privada del diario existente order_events para cliente propietario y ADMIN, con fechas de Perú y paginación. No duplica tablas ni publica identificadores del personal.
+- Listado de pedidos paginado en bloques de 25 para conservar acceso a pedidos antiguos; protege respuestas tardías al cambiar de cuenta.
+- Migración overblack_customer_order_history aplicada. Sintaxis correcta y acceso sin sesión rechazado; pruebas completas con pedidos reservadas para el final.
+- Direcciones publicadas: respaldo main a1e9b70dbaadaaf5b919cbcb320c2b6d7997c8fe. Mi Cuenta muestra Mis direcciones.
+
