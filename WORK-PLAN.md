@@ -72,3 +72,10 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Catálogo: categorías sincronizadas, descripción, galería y ampliación dentro de la interfaz actual.
 - Migración overblack_product_descriptions_categories_gallery aplicada. Comprobación mínima con transacción revertida: guardar descripción/categoría y galería mediante rol ADMIN funciona; no se modificó mercancía existente.
 - Sintaxis JS correcta; pruebas completas de carga, concurrencia y móvil pendientes del bloque final. Asesores de seguridad sin avisos nuevos; se mantienen los dos avisos previamente documentados.
+
+## Stock por talla — 29 septiembre
+- Historial privado de stock reutiliza admin_audit, sin duplicar tablas de inventario: cantidad anterior, variación, cantidad final, talla, fecha, responsable y pedido cuando corresponde.
+- Registro automático en creación/ajuste/eliminación de talla, compra confirmada y restauración por cancelación. No se inventó historial anterior.
+- Consulta paginada protegida para ADMIN e interfaz Historial de stock preparada.
+- Catálogo distingue tallas agotadas y última unidad.
+- Migración overblack_stock_movements_existing_audit aplicada; comprobación mínima de tres movimientos dentro de transacción revertida correcta. No se alteró stock real. Asesores sin avisos nuevos. Pruebas completas al final.

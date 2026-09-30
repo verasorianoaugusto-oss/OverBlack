@@ -101,4 +101,4 @@
 .ob-product-thumbs img{display:block;width:62px;height:70px;object-fit:contain}
 .ob-product-description{white-space:pre-wrap;overflow-wrap:anywhere}
 .ob-commerce-dialog fieldset{min-width:0;border:0;padding:0}
-.product .ob-secondary{padding:8px 12px;font-size:12px;margin:4px 0 12px}
+.product .ob-secondary{padding:8px 12px;font:600 12px Arial,sans-serif;margin:4px 0 12px;background:#111;color:#f5f5f5;border:1px solid #444;cursor:pointer}.product .ob-secondary:hover,.product .ob-secondary:focus-visible{border-color:#c8ff45;color:#c8ff45}
