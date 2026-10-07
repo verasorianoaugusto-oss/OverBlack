@@ -325,3 +325,32 @@ test('configuration rejects stale edits while merging unrelated changes',async()
  const saved=(await owner('select value from public.ob_settings')).rows[0].value;assert.equal(saved.announcement,'First change');assert.equal(saved.email_intro,'Independent change');
  await owner('update public.ob_settings set value=$1',[original]);
 });
+
+test('gallery rejects other products, duplicate photos and stale edits',async()=>{
+ const product=(await as(admin,"select public.ob_product_manage('create',null,$1) as id",[{name:'Gallery isolated',category:'hoodie',collection:'unisex'}])).rows[0].id;
+ const a=product+'/a.webp',b=product+'/b.webp';
+ await as(admin,"insert into storage.objects values('product-images',$1),('product-images',$2)",[a,b]);
+ await assert.rejects(as(u,'select public.ob_product_gallery($1,$2,$3)',[product,[a],[]]),/Acceso denegado/);
+ await assert.rejects(as(admin,'select public.ob_product_gallery($1,$2,$3)',[product,['5/test.jpg'],[]]),/Foto no válida/);
+ await assert.rejects(as(admin,'select public.ob_product_gallery($1,$2,$3)',[product,[a,a],[]]),/fotos diferentes/);
+ await as(admin,'select public.ob_product_gallery($1,$2,$3)',[product,[a,b],[]]);
+ await assert.rejects(as(admin,'select public.ob_product_gallery($1,$2,$3)',[product,[b],[]]),/Las fotos cambiaron/);
+ await as(admin,'select public.ob_product_gallery($1,$2,$3)',[product,[b,a],[a,b]]);
+ const row=(await owner('select image_path,gallery_paths from public.ob_products where id=$1',[product])).rows[0];
+ assert.equal(row.image_path,b);assert.deepEqual(row.gallery_paths,[a]);
+ await as(admin,'select public.ob_product_gallery($1,$2,$3)',[product,[],[b,a]]);
+ assert.equal((await owner('select count(*)::int n from storage.objects where name=any($1)',[[a,b]])).rows[0].n,2);
+});
+
+test('stock history is private and cancellation restores each ordered quantity once',async()=>{
+ await assert.rejects(as(u,'select public.ob_stock_history(1)'),/Acceso denegado/);
+ await assert.rejects(as(admin,'select public.ob_stock_history(1,-1)'),/Página no válida/);
+ const history=(await as(admin,'select public.ob_stock_history(1) as h')).rows[0].h;
+ const orders=history.filter(e=>e.details.reason==='pedido');
+ assert.ok(orders.length>0);
+ for(const sale of orders){
+  assert.ok(sale.details.delta<0);
+  const refunds=history.filter(e=>e.details.reason==='cancelacion'&&e.details.order_id===sale.details.order_id&&e.details.variant_id===sale.details.variant_id);
+  assert.equal(refunds.length,1);assert.equal(refunds[0].details.delta,-sale.details.delta);
+ }
+});
