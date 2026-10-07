@@ -144,3 +144,13 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Guardar y eliminar comparten bloqueo para evitar operaciones simultáneas; se comprueba la sesión antes de guardar y limpiar la foto anterior.
 - Validación de formato/tamaño y sintaxis JavaScript comprobadas. No se alteraron perfiles ni archivos de usuarios para probar.
 
+
+- Mejora del perfil publicada: b9c4ef2b217ac04adedc6ac5ea54b577ce6fbf2d. Vista previa confirmada en overblack.store/account.html.
+- 26/26 pruebas aisladas aprobadas: se añadieron galería (propiedad, duplicados, cambios simultáneos) e historial de stock (cancelación devuelve una sola vez). Comprobación adicional de bloqueo simultáneo del editor de perfil aprobada.
+
+
+## Ayuda operativa ADMIN — 7 octubre
+- Manual organizado en 10 temas con búsqueda sin distinguir tildes, instrucciones de pedidos Confirmados, Shalom, cancelaciones, galería, stock y recuperación.
+- Centro de errores: actualización manual, diferencia entre espera y fallo, aviso de revisión antigua, fechas de Perú y explicación de recuperación sin duplicar pedidos.
+- Reutiliza permisos, reporte y reintento existentes; no añade tablas ni cambia SMTP. Revisado en navegador local con datos simulados. Recepción real de correo sigue pendiente.
+
