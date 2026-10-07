@@ -120,3 +120,21 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Lista 200: estado Confirmado añadido entre recibido/adelanto confirmado y preparación; se mantienen transiciones antiguas por compatibilidad. Reglas de entrega en catálogo y carrito. Checkout muestra porcentaje exacto calculado por servidor.
 - Correo versión 7 activa con estado Confirmado. Sintaxis JS comprobada. Seguridad sin avisos nuevos; pendientes históricos de pg_net y contraseñas filtradas siguen documentados.
 
+
+## Validación y respaldo — 30 septiembre
+- 24/24 pruebas de base de datos pasaron en PGlite aislado; cargan todas las migraciones nuevas. Cobertura: puntos, límites de STACK, stock, descuento, idempotencia, cancelación, roles, privacidad, direcciones, historial, referencia Shalom y configuración concurrente. No se crearon pedidos de prueba en producción.
+- Fuente del correo v7 respaldada en GitHub (4ae5ea9244493b0160ac5f8e29a0b4a9e3563306). Respaldo integral de SQL y pruebas preparado.
+- Pendientes reales: recepción de correo, recorrido de compra/navegador con stock controlado, revisión móvil completa; datos y políticas comerciales todavía no facilitados. No equivale a tienda lista para ventas ni a todas las pruebas end-to-end aprobadas.
+
+
+## Reanudación — 7 octubre
+- GitHub main sigue en 4ae5ea9244493b0160ac5f8e29a0b4a9e3563306. Respaldo integral aún no confirmado: navegador autenticado como Marquinhobarbieri sin permiso de escritura. Se solicitó autenticación con el propietario; no se modificaron permisos.
+- Revisión visual móvil con viewport 390x844: ancho de contenido 375 px, sin desbordamiento horizontal; canvas de 347 px dentro de pantalla. Cajas y controles visibles. No se inició ninguna partida ni se consumieron intentos.
+- Carrito vacío muestra correctamente Lima contraentrega y Shalom 50% con flete aparte. Sin datos ni pedidos de prueba añadidos en producción.
+
+
+- Acceso del propietario restablecido el 7 de octubre; GitHub permite nuevamente publicar. Se retoma el respaldo integral sin cambiar la base de datos en producción.
+
+
+- Respaldo de 31 archivos de database confirmado en GitHub: bad9fb9aac737ac7e7aa382da5a0ab6166689ba5. Archivo de pruebas aisladas incorporado a tests/database.test.cjs; no se ejecutaron migraciones nuevamente en producción.
+
