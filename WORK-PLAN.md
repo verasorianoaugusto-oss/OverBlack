@@ -138,3 +138,9 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 
 - Respaldo de 31 archivos de database confirmado en GitHub: bad9fb9aac737ac7e7aa382da5a0ab6166689ba5. Archivo de pruebas aisladas incorporado a tests/database.test.cjs; no se ejecutaron migraciones nuevamente en producción.
 
+
+## Foto de perfil — 7 octubre
+- Vista previa de foto actual y archivo seleccionado antes de guardar; avatar OB por defecto conservado.
+- Guardar y eliminar comparten bloqueo para evitar operaciones simultáneas; se comprueba la sesión antes de guardar y limpiar la foto anterior.
+- Validación de formato/tamaño y sintaxis JavaScript comprobadas. No se alteraron perfiles ni archivos de usuarios para probar.
+

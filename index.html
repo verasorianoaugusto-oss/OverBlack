@@ -84,7 +84,7 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 <script defer src="vendor-supabase.js?v=21"></script>
 <script defer src="commerce-config.js?v=1"></script>
 <script defer src="order-panel.js?v=32"></script><script defer src="delivery-addresses.js?v=27"></script><script defer src="stock-history.js?v=25"></script><script defer src="gallery-editor.js?v=24"></script><script defer src="product-editor.js?v=25"></script>
-<script defer src="admin-customers.js?v=22"></script><script defer src="admin-security.js?v=20"></script><script defer src="profile-editor.js?v=20"></script><script defer src="admin-center.js?v=31"></script><script defer src="login.js?v=32"></script><script defer src="store-content.js?v=32"></script>
+<script defer src="admin-customers.js?v=22"></script><script defer src="admin-security.js?v=20"></script><script defer src="profile-editor.js?v=21"></script><script defer src="admin-center.js?v=31"></script><script defer src="login.js?v=32"></script><script defer src="store-content.js?v=32"></script>
 <script defer src="stack.js?v=22"></script><script defer src="shop.js?v=32"></script>
 <link rel="stylesheet" href="stack-mobile.css?v=1"></head>
 <body>
@@ -199,3 +199,4 @@ body{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/20
 (()=>{const root=document.getElementById('outfit'),slides=[...root.querySelectorAll('.look-slide')],dots=[...root.querySelectorAll('[data-look]')],reduced=matchMedia('(prefers-reduced-motion: reduce)');let index=0,timer=null,paused=reduced.matches,hover=false;function show(n){index=(n+slides.length)%slides.length;slides.forEach((s,i)=>s.hidden=i!==index);dots.forEach((d,i)=>d.setAttribute('aria-pressed',String(i===index)));document.getElementById('look-count').textContent=String(index+1).padStart(2,'0')+' / 04';}function schedule(){clearInterval(timer);if(!paused&&!hover&&!document.hidden&&!root.contains(document.activeElement))timer=setInterval(()=>show(index+1),5000);}document.getElementById('look-prev').addEventListener('click',()=>{show(index-1);schedule();});document.getElementById('look-next').addEventListener('click',()=>{show(index+1);schedule();});dots.forEach((d,i)=>d.addEventListener('click',()=>{show(i);schedule();}));root.addEventListener('pointerenter',e=>{if(e.pointerType==='mouse'){hover=true;schedule();}});root.addEventListener('pointerleave',()=>{hover=false;schedule();});root.addEventListener('focusin',schedule);root.addEventListener('focusout',()=>setTimeout(schedule,0));document.addEventListener('visibilitychange',schedule);reduced.addEventListener('change',e=>{paused=e.matches;schedule();});schedule();})();
 </script></body>
 </html>
+
