@@ -203,3 +203,10 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Panel bloquea acciones simultáneas durante guardado, filtros e historial; restaura interacción tras errores y rechaza acciones si cambia la cuenta.
 - Botón Actualizar pedidos conserva filtros y página. Reutiliza consultas y permisos existentes.
 - Sintaxis comprobada y tres verificaciones aisladas aprobadas: concurrencia, recuperación tras fallo y cambio de sesión. Sin pedidos reales.
+- Publicación confirmada: b1e1e9dadcd2b3b4fe1bf6fab5f376c4b4e7b177. Mi Cuenta carga order-panel.js?v=33. Revisión visual local de este panel pendiente: el navegador bloqueó la página de simulación; verificaciones aisladas aprobadas.
+
+## Clientes y seguridad: cambio de sesión — 8 octubre
+- Descarta respuestas de clientes y permisos si la cuenta cambió durante la carga. Detalle de cliente no reemplaza una vista que ya se cerró.
+- Seguridad bloquea operaciones simultáneas y valida cuenta antes de actuar o mostrar confirmación. Roles reales sin cambios.
+- Fechas de clientes y auditoría de permisos en horario de Perú.
+- Sintaxis y cuatro verificaciones aisladas aprobadas: cargas tardías en ambas vistas, concurrencia y acciones tras cambio de cuenta.
