@@ -35,9 +35,11 @@
  }
  function productDetails(id){
   const p=catalog.find(p=>String(p.id)===String(id));if(!p)return;
+  const variants=sizes.filter(v=>v.product_id===p.id),available=variants.filter(v=>v.stock>0),canAdd=p.active&&!p.archived&&!p.deleted_at&&p.price>0&&available.length;
   const photos=[...new Set([p.image_path,...(p.gallery_paths||[])].filter(Boolean))];
   const url=path=>client.storage.from('product-images').getPublicUrl(path).data.publicUrl;
-  show('<h2>'+esc(p.name)+'</h2><p>'+esc(p.category)+' · '+esc(p.collection)+'</p>'+(photos.length?'<div class="ob-product-view"><img id="ob-product-large" src="'+esc(url(photos[0]))+'" alt="'+esc(p.name)+'"></div><button id="ob-product-zoom" aria-pressed="false">Ampliar foto</button><div class="ob-product-thumbs">'+photos.map((photo,i)=>'<button data-photo-index="'+i+'" aria-label="Ver foto '+(i+1)+'" aria-pressed="'+(!i)+'"><img loading="lazy" src="'+esc(url(photo))+'" alt=""></button>').join('')+'</div>':'<p>Fotos próximamente.</p>')+'<p class="ob-product-description">'+esc(p.description||'Pronto añadiremos más detalles de este producto.')+'</p><p><strong>'+(p.price?money(p.price):'Próximamente')+'</strong></p><p>'+sizes.filter(v=>v.product_id===p.id).map(v=>esc(v.size)+' · '+(v.stock>0?(v.stock===1?'Última unidad':'Disponible'):'Agotado')).join(' / ')+'</p><button id="ob-product-return">Volver al catálogo</button>',true);
+  show('<h2>'+esc(p.name)+'</h2><p>'+esc(p.category)+' · '+esc(p.collection)+'</p>'+(photos.length?'<div class="ob-product-view"><img id="ob-product-large" src="'+esc(url(photos[0]))+'" alt="'+esc(p.name)+'"></div><button id="ob-product-zoom" aria-pressed="false">Ampliar foto</button><div class="ob-product-thumbs">'+photos.map((photo,i)=>'<button data-photo-index="'+i+'" aria-label="Ver foto '+(i+1)+'" aria-pressed="'+(!i)+'"><img loading="lazy" src="'+esc(url(photo))+'" alt=""></button>').join('')+'</div>':'<p>Fotos próximamente.</p>')+'<p class="ob-product-description">'+esc(p.description||'Pronto añadiremos más detalles de este producto.')+'</p><p><strong>'+(p.price?money(p.price):'Próximamente')+'</strong></p><p>'+sizes.filter(v=>v.product_id===p.id).map(v=>esc(v.size)+' · '+(v.stock>0?(v.stock===1?'Última unidad':'Disponible'):'Agotado')).join(' / ')+'</p>'+(canAdd?'<label>Talla<select id="ob-detail-size">'+variants.map(v=>'<option value="'+esc(v.id)+'" '+(v.stock<1?'disabled':'')+'>'+esc(v.size)+(v.stock<1?' · Agotado':v.stock===1?' · Última unidad':'')+'</option>').join('')+'</select></label><button id="ob-detail-add">Añadir al carrito</button>':'<p>'+(p.active?'Producto agotado.':'Producto próximamente disponible.')+'</p>')+'<button id="ob-product-return">Volver al catálogo</button>',true);
+  document.getElementById('ob-detail-add')?.addEventListener('click',e=>run(e.currentTarget,async()=>{const id=document.getElementById('ob-detail-size').value;await changeCart(id,1);await openCart();}));
   document.querySelectorAll('[data-photo-index]').forEach(b=>b.onclick=()=>{document.getElementById('ob-product-large').src=url(photos[Number(b.dataset.photoIndex)]);document.querySelectorAll('[data-photo-index]').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));});
   document.getElementById('ob-product-zoom')?.addEventListener('click',e=>{const expanded=e.currentTarget.getAttribute('aria-pressed')!=='true';e.currentTarget.setAttribute('aria-pressed',String(expanded));e.currentTarget.textContent=expanded?'Reducir foto':'Ampliar foto';document.getElementById('ob-product-large').classList.toggle('ob-zoomed',expanded);});
   document.getElementById('ob-product-return').onclick=e=>e.currentTarget.closest('dialog').close();
@@ -87,12 +89,15 @@
  }
  async function openCart(){
   await syncUser();await load();count();
+  const invalid=basket.some(i=>{const v=sizes.find(v=>v.id===i.variant_id),p=catalog.find(p=>p.id===v?.product_id);return !p?.active||p.archived||p.deleted_at||!p.price||!v?.stock||i.quantity>v.stock;});
+  const buyingDisabled=!settings.checkout_enabled||settings.maintenance;
   const subtotal=basket.reduce((sum,i)=>{const v=sizes.find(v=>v.id===i.variant_id);return sum+(catalog.find(p=>p.id===v?.product_id)?.price||0)*i.quantity;},0);
   show('<h2>Tu carrito</h2>'+(!basket.length?'<p>Tu carrito está vacío.</p><a href="index.html#productos">Ver productos</a>':'')+basket.map(i=>{
    const v=sizes.find(v=>v.id===i.variant_id),p=catalog.find(p=>p.id===v?.product_id),unavailable=!p?.active||p.archived||!p.price||!v?.stock;
    const photo=p?.image_path?client.storage.from('product-images').getPublicUrl(p.image_path).data.publicUrl:'logo-overblack.svg';
    return '<div class="ob-row ob-cart-row"><div class="ob-cart-product"><img src="'+esc(photo)+'" alt="'+esc(p?.name||'Producto')+'" width="64" height="80"><div><b>'+esc(p?.name||'Producto no disponible')+'</b><br>Talla: '+esc(v?.size||'—')+'<br>Precio unitario: '+money(p?.price||0)+'<br>Importe: '+money((p?.price||0)*i.quantity)+(unavailable?'<p>Ya no está disponible. Elimínalo para continuar.</p>':i.quantity>v.stock?'<p>Solo quedan '+v.stock+' unidades. Reduce la cantidad.</p>':'')+'</div></div><div><button data-change="'+i.variant_id+'" data-delta="-1" aria-label="Disminuir cantidad">−</button> '+i.quantity+' <button data-change="'+i.variant_id+'" data-delta="1" aria-label="Aumentar cantidad" '+(unavailable||i.quantity>=Math.min(20,v.stock)?'disabled':'')+'>+</button><button data-change="'+i.variant_id+'" data-delta="0">Eliminar</button></div></div>';
-  }).join('')+(basket.length?'<p><strong>Subtotal: '+money(subtotal)+'</strong></p><p>El descuento y la entrega se calculan al revisar el pedido.</p><button id="ob-checkout">Continuar con mi pedido</button><button id="ob-clear-cart" class="ob-secondary">Vaciar carrito</button>':'')+'<p id="ob-cart-feedback" role="status"></p>');
+  }).join('')+(basket.length?'<p><strong>Subtotal: '+money(subtotal)+'</strong></p><p>El descuento y la entrega se calculan al revisar el pedido.</p><button id="ob-checkout" '+(invalid||buyingDisabled?'disabled':'')+'>Continuar con mi pedido</button><button id="ob-clear-cart" class="ob-secondary">Vaciar carrito</button>':'')+'<p id="ob-cart-feedback" role="status"></p>');
+  document.getElementById('ob-cart-feedback').textContent=basket.length?(invalid?'Revisa los productos no disponibles o las cantidades indicadas antes de continuar.':buyingDisabled?'Las compras todavía no están habilitadas. Puedes conservar tu carrito para más adelante.':''):'';
   document.querySelectorAll('[data-change]').forEach(b=>b.onclick=()=>run(b,async()=>{await changeCart(b.dataset.change,Number(b.dataset.delta));await openCart();}));
   document.getElementById('ob-clear-cart')?.addEventListener('click',e=>run(e.target,clearCart));
   const deliveryInfo=document.createElement('p');deliveryInfo.textContent=[settings.lima_enabled?'Lima Metropolitana: pago contraentrega.':'',settings.province_enabled?'Provincias: Shalom con '+settings.deposit_percent+'% de adelanto. Flete por coordinar aparte.':''].filter(Boolean).join(' ');document.getElementById('ob-cart-feedback').before(deliveryInfo);
@@ -122,8 +127,9 @@
    delivery.expected_total=quote.total;delivery.expected_advance=quote.advance_due;
    const request=crypto.randomUUID();
    show('<h2>Revisa tu pedido</h2>'+quote.items.map(i=>'<p>'+esc(i.name)+' · '+esc(i.size)+' × '+i.quantity+' · '+money(i.unit_price*i.quantity)+'</p>').join('')+'<p>'+esc(delivery.recipient)+' · '+esc(delivery.phone)+'<br>'+esc(delivery.department)+' · '+esc(delivery.province)+'<br>'+esc(delivery.address||delivery.destination)+' · '+esc(delivery.district||delivery.agency)+'</p><p>Subtotal: '+money(quote.subtotal)+'<br>Entrega: '+(delivery.mode==='shalom'?'Flete Shalom por coordinar':money(quote.shipping))+'<br>Descuento: '+money(quote.discount)+' ('+Number(quote.discount_percent||0)+'%)<br>Puntos usados: '+quote.points_spent+'</p><h3>Total: '+money(quote.total)+'</h3><p>'+(quote.advance_due?'Adelanto: '+money(quote.advance_due)+' · Saldo: '+money(quote.total-quote.advance_due):'Pago contraentrega')+'</p><button id="ob-confirm-order">Confirmar pedido</button><button id="ob-edit-order">Editar datos</button>');
-   document.getElementById('ob-edit-order').onclick=()=>run(null,()=>checkout(draft));
-   document.getElementById('ob-confirm-order').onclick=e=>run(e.target,async()=>{
+   let confirming=false;const editOrder=document.getElementById('ob-edit-order');
+   editOrder.onclick=()=>{if(!confirming)run(editOrder,()=>checkout(draft));};
+   document.getElementById('ob-confirm-order').onclick=e=>{if(confirming)return;confirming=true;editOrder.disabled=true;run(e.target,async()=>{try{
     if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
     const order=await rpc('ob_checkout',{p_items:items,p_delivery:delivery,p_reward:reward,p_request:request,p_commit:true});
     if(C.user?.id!==checkoutUser)return;
@@ -131,7 +137,7 @@
     try{const result=await client.from('ob_cart_items').delete().eq('user_id',C.user.id);error=result.error;}catch(e){error=e;}
     try{await C.refresh();}catch{}
     show('<h2>Pedido recibido</h2><h3>'+esc(order.code)+'</h3><p>Total: '+money(order.total)+'</p><p>'+(order.advance_due?'Pendiente de adelanto: '+money(order.advance_due)+'. Coordina el pago con OVERBLACK.':'Lima Metropolitana · pago contraentrega.')+'</p><a href="account.html">Ver mis pedidos</a>'+(error?'<p>Tu pedido está registrado. No pudimos limpiar el carrito guardado.</p>':''));
-   });
+   }finally{confirming=false;editOrder.disabled=false;}});};
   });};
  }
  function filter(group,el){document.querySelectorAll(group).forEach(b=>{b.classList.toggle('active',b===el);b.setAttribute('aria-pressed',String(b===el));});renderStore();}

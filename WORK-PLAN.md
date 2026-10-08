@@ -154,3 +154,14 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Centro de errores: actualización manual, diferencia entre espera y fallo, aviso de revisión antigua, fechas de Perú y explicación de recuperación sin duplicar pedidos.
 - Reutiliza permisos, reporte y reintento existentes; no añade tablas ni cambia SMTP. Revisado en navegador local con datos simulados. Recepción real de correo sigue pendiente.
 
+
+- Publicación confirmada en GitHub: 08ce7b29b480d97636c3316bf42cb83ca28cf83a. overblack.store/account.html carga admin-center.js?v=32 sin errores de consola en la revisión. Manual y estados revisados con datos simulados; sesión ADMIN real de estas nuevas vistas pendiente.
+- Correo: última conexión SMTP verificada el 7 octubre a las 18:40 Perú; 0 pendientes, 0 fallidos. Esto no confirma recepción real de pedidos.
+
+
+## Catálogo y confirmación — 7 octubre
+- La ficha de fotos/detalles permite elegir talla y añadir al carrito; agotadas deshabilitadas.
+- Carrito señala cantidades inválidas y ventas desactivadas antes de continuar.
+- Confirmar pedido bloquea edición simultánea y doble confirmación; permite reintentar tras un fallo usando la misma solicitud.
+- Verificación local con producto simulado: talla agotada, última unidad, paso desde ficha al carrito, límite de cantidad y bloqueo de compras. Prueba de concurrencia de confirmación aprobada; no se crearon pedidos reales.
+
