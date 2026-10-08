@@ -165,3 +165,13 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Confirmar pedido bloquea edición simultánea y doble confirmación; permite reintentar tras un fallo usando la misma solicitud.
 - Verificación local con producto simulado: talla agotada, última unidad, paso desde ficha al carrito, límite de cantidad y bloqueo de compras. Prueba de concurrencia de confirmación aprobada; no se crearon pedidos reales.
 
+
+- Publicado: 3e6f0366ec4e4a09d805d08b79d8b5b2560c755c. Sitio público carga shop.js?v=33 sin errores de consola; ficha de producto inactivo comprobada. Simulación local de stock agotado bloquea continuar y explica cómo corregirlo. El control de viewport no cambió el ancho informado: revisión móvil específica de este bloque sigue pendiente.
+
+
+## Protección de edición de inventario — 8 octubre
+- ADMIN Productos conserva selección tras guardar y abre el producto recién creado. Bloquea operaciones simultáneas y comprueba cambios de sesión.
+- Guardado comprobado contra stock, precio, estado y foto anteriores bajo bloqueo de filas; reutiliza ob_product_save e inventario existentes sin tablas nuevas. Producto eliminado no se puede editar.
+- Migración overblack_inventory_concurrent_edit aplicada. Fuente integrada en database/product-details.sql. El editor tiene Recargar datos del producto para resolver conflictos.
+- 27/27 pruebas aisladas aprobadas, incluyendo permisos, stock cambiado, nueva talla y producto retirado. No se modificó inventario real en las comprobaciones.
+
