@@ -4,7 +4,7 @@
     isolation:isolate;
     border-radius:12px;
     background:
-      radial-gradient(ellipse at 50% 43%,#70757a28,transparent 58%),
+      radial-gradient(ellipse at 50% 43%,#87929b36,transparent 58%),
       linear-gradient(180deg,#08090c4d 0%,#08090b38 65%,#050607cc 100%);
     box-shadow:inset 0 0 0 1px #ffffff0a,inset 0 -24px 40px #0005;
   }
@@ -16,9 +16,12 @@
     border-radius:inherit;
     pointer-events:none;
     background:
-      radial-gradient(ellipse at 50% 46%,#a7b3ba24 0%,#090b1000 55%),
-      linear-gradient(112deg,transparent 15%,#a3192524 15.3%,transparent 16.1%,transparent 83%,#bd202521 83.3%,transparent 84%),
-      linear-gradient(#080a0eb3,#08090caf),
+      radial-gradient(ellipse at 50% 46%,#b5c3cc38 0%,#090b1000 55%),
+      radial-gradient(ellipse at 9% 67%,#ad1d2925,transparent 39%),
+      radial-gradient(ellipse at 94% 28%,#9f1d2720,transparent 34%),
+      repeating-linear-gradient(0deg,transparent 0 47px,#c0c7ce08 48px,transparent 49px 96px),
+      linear-gradient(112deg,transparent 15%,#a3192538 15.3%,transparent 16.1%,transparent 83%,#bd202532 83.3%,transparent 84%),
+      linear-gradient(#080a0e8f,#08090c99),
       url('stack-background.jpg') 50% 44% / auto 112% no-repeat;
     /* A tiny static blur softens the scenery without filtering the game canvas. */
     filter:blur(.6px);
@@ -30,12 +33,12 @@
     z-index:-1;
     pointer-events:none;
     border:1px solid #6c70733d;
-    border-top:2px solid #a1a5a640;
+    border-top:2px solid #b0b5b660;
     border-radius:50%;
     background:
-      linear-gradient(90deg,transparent,#9b1e283b 20%,#777b7c33 50%,#9b1e283b 80%,transparent),
+      linear-gradient(90deg,transparent,#9b1e2852 20%,#777b7c33 50%,#9b1e283b 80%,transparent),
       repeating-linear-gradient(100deg,#25282b 0 2px,#181b1d 3px 9px);
-    box-shadow:0 6px 0 #0c0e10,0 13px 18px 5px #000b,0 -7px 25px #b0222212;
+    box-shadow:0 6px 0 #0c0e10,0 13px 18px 5px #000b,0 -7px 25px #b0222226;
   }
   #stack canvas {position:relative;z-index:0}
   #stack .ob-arena-foot {z-index:1;color:#c5c6c8;text-shadow:0 1px 4px #000}

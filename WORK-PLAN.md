@@ -189,3 +189,9 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 
 - Punto 128: carrito identifica al propietario en memoria; cambiar de cuenta descarta el carrito de la anterior antes de mezclar el del visitante. Si cambia la sesión durante carga, sincroniza la nueva al terminar. Tres pruebas aisladas aprobadas: cambio directo, carrera de cargas y conservación del carrito de visitante.
 
+
+## STACK móvil: ambiente urbano — 8 octubre
+- Suavizada la capa oscura para recuperar profundidad de la fotografía existente; halo central, reflejos rojos laterales, líneas de textura y plataforma más visibles.
+- Solo stack-mobile.css y su versión en index: no se modificaron stack.js, motor, caja ni reglas. Capas estáticas sin imágenes ni animaciones nuevas.
+- Revisión en iframe real de 390 px: contenido útil 375 px, canvas 347 px, sin desbordamiento horizontal. Captura visual verificada sin iniciar partidas. No equivale a prueba de FPS en un celular físico.
+
