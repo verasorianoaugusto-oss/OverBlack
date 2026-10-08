@@ -195,3 +195,11 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Solo stack-mobile.css y su versión en index: no se modificaron stack.js, motor, caja ni reglas. Capas estáticas sin imágenes ni animaciones nuevas.
 - Revisión en iframe real de 390 px: contenido útil 375 px, canvas 347 px, sin desbordamiento horizontal. Captura visual verificada sin iniciar partidas. No equivale a prueba de FPS en un celular físico.
 
+
+- Publicado en GitHub: b9bbcbf0c44848bacddad6561f6b2cd3bee7752a. Pendiente confirmar propagación en dominio al momento de registrar este apunte.
+- Confirmado en https://overblack.store/: stack-mobile.css?v=2. Captura de revisión móvil guardada en overblack-stack-fondo-movil-v2.png fuera del sitio.
+
+## Pedidos: operaciones simultáneas — 8 octubre
+- Panel bloquea acciones simultáneas durante guardado, filtros e historial; restaura interacción tras errores y rechaza acciones si cambia la cuenta.
+- Botón Actualizar pedidos conserva filtros y página. Reutiliza consultas y permisos existentes.
+- Sintaxis comprobada y tres verificaciones aisladas aprobadas: concurrencia, recuperación tras fallo y cambio de sesión. Sin pedidos reales.
