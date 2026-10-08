@@ -354,3 +354,21 @@ test('stock history is private and cancellation restores each ordered quantity o
   assert.equal(refunds.length,1);assert.equal(refunds[0].details.delta,-sale.details.delta);
  }
 });
+
+test('inventory editor rejects stale stock, product edits and non-admin writes',async()=>{
+ const product=(await as(admin,"select public.ob_product_manage('create',null,$1) as id",[{name:'Stock isolation',category:'polos',collection:'unisex'}])).rows[0].id;
+ const initial={price:null,active:false,image_path:null,archived:false,stock:null};
+ const call='select public.ob_product_save_checked($1,5000,false,$2,$3,null,$4)';
+ await assert.rejects(as(u,call,[product,'M',5,initial]),/Acceso denegado/);
+ await as(admin,call,[product,'M',5,initial]);
+ const opened={...initial,price:5000,stock:5};
+ await owner("update public.ob_variants set stock=4 where product_id=$1 and size='M'",[product]);
+ await assert.rejects(as(admin,call,[product,'M',8,opened]),/stock cambió/);
+ assert.equal((await owner("select stock from public.ob_variants where product_id=$1 and size='M'",[product])).rows[0].stock,4);
+ await as(admin,call,[product,'M',8,{...opened,stock:4}]);
+ await assert.rejects(as(admin,call,[product,'L',2,initial]),/stock cambió/);
+ await as(admin,call,[product,'L',2,{...opened,stock:null}]);
+ await assert.rejects(as(admin,call,[product,'M',9,null]),/stock cambió/);
+ await as(admin,"select public.ob_product_manage('delete',$1)",[product]);
+ await assert.rejects(as(admin,call,[product,'M',9,{...opened,stock:8}]),/Producto inexistente/);
+});
