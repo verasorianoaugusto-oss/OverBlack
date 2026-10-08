@@ -3,7 +3,7 @@
  const C=window.OBCommerce;if(!document.getElementById('grid')||!C)return;
  const {client,rpc,select,show,run,esc}=C;
  const money=n=>'S/ '+(n/100).toFixed(2);
- let catalog=[],sizes=[],basket=[],settings={},loadedUser=null,syncing=null;
+ let catalog=[],sizes=[],basket=[],settings={},loadedUser=null,basketOwner=null,syncing=null;
  try{const saved=JSON.parse(sessionStorage.getItem('ob.guest.cart')||'[]');if(Array.isArray(saved))basket=saved.filter(i=>typeof i.variant_id==='string'&&Number.isInteger(i.quantity)&&i.quantity>0&&i.quantity<=20).slice(0,30);}catch{}
  const remember=()=>{try{sessionStorage.setItem('ob.guest.cart',JSON.stringify(basket));}catch{}};
  async function load(){[catalog,sizes]=await Promise.all([select('ob_products'),select('ob_variants')]);const rows=await select('ob_settings');settings=rows[0].value;}
@@ -13,15 +13,17 @@
   const {error}=await client.from('ob_cart_items').upsert(basket.map(i=>({...i,user_id:C.user.id})));if(error)throw error;
  }
  async function syncUser(){
-  if(syncing)return syncing;
+  if(syncing){await syncing;if(C.user?.id&&C.user.id!==loadedUser)return syncUser();return;}
   syncing=mergeUser();try{await syncing;}finally{syncing=null;}
+  if(C.user?.id&&C.user.id!==loadedUser)return syncUser();
  }
  async function mergeUser(){
   await C.ready;const uid=C.user?.id;if(!uid||uid===loadedUser)return;
+  if(basketOwner&&basketOwner!==uid){basket=[];basketOwner=null;loadedUser=null;remember();count();}
   const {data,error}=await client.from('ob_cart_items').select('variant_id,quantity').eq('user_id',uid);if(error)throw error;
   const merged=new Map(data.map(i=>[i.variant_id,i]));for(const i of basket)if(!merged.has(i.variant_id))merged.set(i.variant_id,i);
   if(C.user?.id!==uid)return;
-  basket=[...merged.values()];if(basket.length)await saveCart();loadedUser=uid;sessionStorage.removeItem('ob.guest.cart');count();
+  basket=[...merged.values()];basketOwner=uid;if(basket.length)await saveCart();if(C.user?.id!==uid)return;loadedUser=uid;sessionStorage.removeItem('ob.guest.cart');count();
  }
  function count(){document.getElementById('count').textContent=basket.reduce((s,i)=>s+i.quantity,0);}
  function syncCategories(){
@@ -105,9 +107,9 @@
  }
  async function checkout(draft={}){
   if(cartBusy)throw Error('Espera a que termine de guardarse el carrito.');
-  if(!C.user)remember();if(!await C.requireUser())return;await C.refresh();await load();
+  if(!C.user)remember();if(!await C.requireUser())return;const checkoutUser=C.user?.id;if(!checkoutUser)return;await C.refresh();await load();
+  if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
   if(!settings.checkout_enabled||settings.maintenance)throw Error('Las compras todavía no están habilitadas.');
-  const checkoutUser=C.user.id;
   const [options,addresses]=await Promise.all([rpc('ob_delivery_options'),rpc('ob_address_book')]);
   if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
   let savedAddressId=draft.saved_address_id||null;
@@ -118,11 +120,12 @@
   form.elements.reward.value=String(draft.reward||0);form.elements.coupon.value=draft.coupon||'';form.elements.save_address.checked=draft.save_address==='on';
   form.elements.saved_address_id.onchange=()=>{savedAddressId=form.elements.saved_address_id.value||null;fillAddress(addresses.find(a=>a.id===savedAddressId)?.delivery||{});form.elements.save_address.checked=false;};
   form.onsubmit=e=>{e.preventDefault();run(e.submitter,async()=>{
+   if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
    draft=Object.fromEntries(new FormData(form));const delivery={...draft},reward=Number(delivery.reward),items=basket.map(i=>({...i}));delete delivery.reward;delete delivery.save_address;delete delivery.saved_address_id;
    const quote=await rpc('ob_checkout',{p_items:items,p_delivery:delivery,p_reward:reward});
    if(C.user?.id!==checkoutUser)throw Error('Tu sesión cambió. Vuelve a abrir el carrito.');
    Object.assign(delivery,quote.delivery);
-   if(draft.save_address==='on'){const saved=await rpc('ob_address_book',{p_action:'save',p_id:savedAddressId,p_delivery:delivery});savedAddressId=saved.id;draft.saved_address_id=saved.id;}
+   if(draft.save_address==='on'){const saved=await rpc('ob_address_book',{p_action:'save',p_id:draft.saved_address_id||null,p_delivery:delivery});savedAddressId=saved.id;draft.saved_address_id=saved.id;}
    if(C.user?.id!==checkoutUser)return;
    delivery.expected_total=quote.total;delivery.expected_advance=quote.advance_due;
    const request=crypto.randomUUID();
@@ -134,8 +137,10 @@
     const order=await rpc('ob_checkout',{p_items:items,p_delivery:delivery,p_reward:reward,p_request:request,p_commit:true});
     if(C.user?.id!==checkoutUser)return;
     basket=[];remember();count();let error=null;
-    try{const result=await client.from('ob_cart_items').delete().eq('user_id',C.user.id);error=result.error;}catch(e){error=e;}
+    try{const result=await client.from('ob_cart_items').delete().eq('user_id',checkoutUser);error=result.error;}catch(e){error=e;}
+    if(C.user?.id!==checkoutUser)return;
     try{await C.refresh();}catch{}
+    if(C.user?.id!==checkoutUser)return;
     show('<h2>Pedido recibido</h2><h3>'+esc(order.code)+'</h3><p>Total: '+money(order.total)+'</p><p>'+(order.advance_due?'Pendiente de adelanto: '+money(order.advance_due)+'. Coordina el pago con OVERBLACK.':'Lima Metropolitana · pago contraentrega.')+'</p><a href="account.html">Ver mis pedidos</a>'+(error?'<p>Tu pedido está registrado. No pudimos limpiar el carrito guardado.</p>':''));
    }finally{confirming=false;editOrder.disabled=false;}});};
   });};
@@ -145,7 +150,7 @@
  window.selectCollection=(collection,el)=>filter('.collection',el);
  window.openCart=()=>run(null,openCart);
  document.querySelectorAll('.filter,.collection').forEach(b=>b.setAttribute('aria-pressed',String(b.classList.contains('active'))));
- window.addEventListener('ob:account',()=>{if(!C.user){if(loadedUser){basket=[];remember();count();}loadedUser=null;}else syncUser().catch(()=>{});});
+ window.addEventListener('ob:account',()=>{if(!C.user){if(basketOwner||loadedUser){basket=[];remember();count();}basketOwner=null;loadedUser=null;}else syncUser().catch(()=>{});});
  C.ready.then(async()=>{
   try{await load();await syncUser();window.render=renderStore;window.openCart=()=>run(null,openCart);renderStore();count();}
   catch(e){document.getElementById('grid').innerHTML='<p role="status">No pudimos cargar los productos. <button id="ob-retry-store">Reintentar</button></p>';document.getElementById('ob-retry-store').onclick=()=>location.reload();}

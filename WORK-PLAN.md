@@ -175,3 +175,17 @@ Interfaz y recursos publicados en main (70ad29d). Corrección de empaquetado de 
 - Migración overblack_inventory_concurrent_edit aplicada. Fuente integrada en database/product-details.sql. El editor tiene Recargar datos del producto para resolver conflictos.
 - 27/27 pruebas aisladas aprobadas, incluyendo permisos, stock cambiado, nueva talla y producto retirado. No se modificó inventario real en las comprobaciones.
 
+
+- Editor publicado: 2c4807a11e5dd076a6cd3598ef8a7a1ae444661b; sitio público carga product-editor.js?v=26. Respaldo SQL: 3e8967aa79d2948ada14689ccf06d6907fef65eb.
+- Comprobación en producción: función instalada, visitantes sin permiso y llamada sin sesión rechazada. Asesores sin hallazgos nuevos; siguen pg_net y protección de contraseñas filtradas documentados.
+- Pruebas de interfaz local: creación selecciona el nuevo producto y Recargar conserva la selección. Ningún producto real se creó durante estas pruebas.
+
+
+## Confirmación y cambios de sesión — 8 octubre
+- Compra captura la cuenta antes de cargar datos; verifica identidad antes de cotizar y después de limpiar/refrescar tras confirmar. No muestra confirmación en otra sesión.
+- Limpieza del carrito usa la cuenta del pedido, y guardado de dirección usa la selección enviada en el formulario.
+- Pruebas aisladas del controlador: cambio de sesión durante limpieza y refresco, y fallo de refresco después de un pedido confirmado. Sin pedidos reales ni cambios de datos.
+
+
+- Punto 128: carrito identifica al propietario en memoria; cambiar de cuenta descarta el carrito de la anterior antes de mezclar el del visitante. Si cambia la sesión durante carga, sincroniza la nueva al terminar. Tres pruebas aisladas aprobadas: cambio directo, carrera de cargas y conservación del carrito de visitante.
+
