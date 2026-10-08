@@ -55,3 +55,24 @@ grant execute on function private.ob_product_manage(text,bigint,jsonb) to authen
 create or replace function public.ob_product_manage(p_action text,p_product bigint default null,p_data jsonb default '{}') returns bigint language sql set search_path='' as $$select private.ob_product_manage(p_action,p_product,p_data)$$;
 revoke all on function public.ob_product_manage(text,bigint,jsonb) from public,anon;
 grant execute on function public.ob_product_manage(text,bigint,jsonb) to authenticated;
+-- Guard existing inventory writes against stale administrator forms.
+create function private.ob_product_save_checked(p_product bigint,p_price integer,p_active boolean,p_size text,p_stock integer,p_image text,p_expected jsonb)
+returns void language plpgsql security definer set search_path='' as $$
+declare product public.ob_products; current_stock integer; snapshot jsonb;
+begin
+ if auth.uid() is null or not private.ob_is_admin() then raise exception 'Acceso denegado'; end if;
+ select * into product from public.ob_products where id=p_product and deleted_at is null for update;
+ if not found then raise exception 'Producto inexistente'; end if;
+ select stock into current_stock from public.ob_variants where product_id=p_product and size=trim(p_size) for update;
+ snapshot:=jsonb_build_object('price',product.price,'active',product.active,'image_path',product.image_path,'archived',product.archived,'stock',current_stock);
+ if p_expected is distinct from snapshot then
+  raise exception 'El producto o el stock cambió mientras editabas. Recarga los datos y revisa la cantidad antes de guardar.';
+ end if;
+ perform private.ob_product_save(p_product,p_price,p_active,p_size,p_stock,p_image);
+end $$;
+revoke all on function private.ob_product_save_checked(bigint,integer,boolean,text,integer,text,jsonb) from public,anon;
+grant execute on function private.ob_product_save_checked(bigint,integer,boolean,text,integer,text,jsonb) to authenticated;
+create function public.ob_product_save_checked(p_product bigint,p_price integer,p_active boolean,p_size text,p_stock integer,p_image text,p_expected jsonb)
+returns void language sql security invoker set search_path='' as $$select private.ob_product_save_checked(p_product,p_price,p_active,p_size,p_stock,p_image,p_expected)$$;
+revoke all on function public.ob_product_save_checked(bigint,integer,boolean,text,integer,text,jsonb) from public,anon;
+grant execute on function public.ob_product_save_checked(bigint,integer,boolean,text,integer,text,jsonb) to authenticated;
